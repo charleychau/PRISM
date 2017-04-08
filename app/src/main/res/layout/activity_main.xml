@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.charleychau.prism.MainActivity">
+
+    <Button
+        android:id="@+id/buttonUID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Have a UID?"
+        tools:layout_editor_absoluteX="139dp"
+        tools:layout_editor_absoluteY="165dp"
+        android:layout_above="@+id/buttonPrescription"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="105dp" />
+
+    <Button
+        android:id="@+id/buttonPrescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Have a Prescription?"
+        tools:layout_editor_absoluteX="102dp"
+        tools:layout_editor_absoluteY="292dp"
+        android:layout_marginBottom="148dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>
