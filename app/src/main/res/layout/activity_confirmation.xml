@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.charleychau.prism.Confirmation">
+
+    <EditText
+        android:id="@+id/editTextUID"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/editTextDOB"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="15dp"
+        android:hint="Enter Your UID"
+        android:inputType="textPersonName"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"></EditText>
+
+    <EditText
+        android:id="@+id/editTextDOB"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:ems="10"
+        android:hint="Date of Birth (MM/DD/YY)"
+        android:inputType="text"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+        android:layout_above="@+id/buttonConfirm"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:id="@+id/buttonConfirm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="18dp"
+        android:text="Confirm"
+        tools:layout_editor_absoluteX="148dp"
+        tools:layout_editor_absoluteY="426dp" />
+
+    <Button
+        android:id="@+id/buttonChoosePharm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="81dp"
+        android:text="Choose your pharmacy"
+        tools:layout_editor_absoluteX="93dp"
+        tools:layout_editor_absoluteY="158dp" />
+</RelativeLayout>

@@ -21,8 +21,15 @@ public class MainActivity extends AppCompatActivity {
 
         prescriptionButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v) {
-                Intent addPrescription = new Intent(MainActivity.this, Prescriptions.class);
+                Intent addPrescription = new Intent(MainActivity.this, Snapshot.class);
                 startActivity(addPrescription);
+            }
+        });
+
+        uidButton.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v) {
+                Intent goConfirm = new Intent(MainActivity.this, Confirmation.class);
+                startActivity(goConfirm);
             }
         });
     }

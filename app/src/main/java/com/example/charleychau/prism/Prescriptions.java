@@ -1,11 +1,15 @@
 package com.example.charleychau.prism;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.provider.MediaStore;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -13,71 +17,165 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlacePicker;
+
+import org.altbeacon.beacon.Identifier;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class Prescriptions extends AppCompatActivity {
+public class Prescriptions extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
 
-    private static final int CAMERA_REQUEST = 1888;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    private ImageView imageView;
-    private Button prescriptionButton;
     private Button pharmacyButton;
     private RadioGroup radioNotificationGroup;
     private RadioButton radioNotificationButton;
     private Button sendButton;
+    private GoogleApiClient mGoogleApiClient;
+    int PLACE_PICKER_REQUEST = 1;
+    private ImageView placeImage;
+    private Bitmap placeBitmap;
+    private RequestQueue queue;
+    private String server = "";
+    private Response.Listener<String> responseListener;
+    private Response.ErrorListener errorListener;
+    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
+    protected static final String TAG = "Prescription";
+    private String chosenPharm;
+    private String notification;
+    private Bitmap prescription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_prescriptions);
 
-        prescriptionButton = (Button) findViewById(R.id.buttonPrescription);
-        imageView = (ImageView) findViewById(R.id.imageView);
         pharmacyButton = (Button) findViewById(R.id.buttonPharmacy);
         radioNotificationGroup = (RadioGroup) findViewById(R.id.radioNotification);
         sendButton = (Button) findViewById(R.id.buttonSend);
+        placeImage = (ImageView) findViewById(R.id.imageViewPlace);
 
-        prescriptionButton.setOnClickListener(new View.OnClickListener() {
+        Bundle extras = getIntent().getExtras();
+        prescription = (Bitmap) extras.getParcelable("prescription");
+
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(this)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .enableAutoManage(this, this)
+                .build();
+
+        pharmacyButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //TODO: bring up snapshot taker
-                //Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                //startActivityForResult(cameraIntent, CAMERA_REQUEST);
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                //TODO: set default search query to be pharmacy
+                try {
+                    startActivityForResult(builder.build(Prescriptions.this), PLACE_PICKER_REQUEST);
+                }
+                catch (Exception ex) {
+
                 }
             }
         });
 
-        pharmacyButton.setOnClickListener(new View.OnClickListener() {
+        sendButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //TODO: bring up list of pharms
+                int selectedId = radioNotificationGroup.getCheckedRadioButtonId();
+                // find the radiobutton by returned id
+                radioNotificationButton = (RadioButton) findViewById(selectedId);
+                notification = radioNotificationButton.getText().toString();
+                //TODO: send info to node
+                final String endpointPharm = server + "/" + chosenPharm;
+                final String endpointNotification = server + "/" + notification;
+                //TODO: send bitmap to node final String endpointBitmap = server + "/" + prescription;
+                StringRequest srPharm = new StringRequest(Request.Method.POST, endpointPharm, responseListener, errorListener);
+                StringRequest srNotification = new StringRequest(Request.Method.POST, endpointNotification, responseListener, errorListener);
+                queue.add(srPharm);
+                queue.add(srNotification);
+
+                Context context = getApplicationContext();
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, chosenPharm, duration);
+                toast.show();
             }
         });
+
+        queue = Volley.newRequestQueue(this);
+        responseListener = new Response.Listener<String> () {
+            @Override
+            public void onResponse(String response) {
+                Log.i(TAG, "Response is: " + response);
+            }
+        };
+
+        errorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Error is: " + error.toString());
+            }
+        };
+    }
+
+    private String hextrim(Identifier ident) {
+        return ident.toHexString().substring(2, ident.toHexString().length());
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        /*if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            imageView.setImageBitmap(photo);
-        }*/
-        if (requestCode == REQUEST_IMAGE_CAPTURE){
+        if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Bundle extras = data.getExtras();
-                Bitmap imageBitmap = (Bitmap) extras.get("data");
-                imageView.setImageBitmap(imageBitmap);
-            }
-            else if (resultCode == RESULT_CANCELED){
-                Context context = getApplicationContext();
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, "GOT HERE", duration);
-                toast.show();
+                //TODO: Display map of location
+                Place place = PlacePicker.getPlace(data, this);
+                chosenPharm = place.getName().toString();
+                //placeImage.setImageBitmap();
             }
         }
     }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // An unresolvable error has occurred and a connection to Google APIs
+        // could not be established. Display an error message, or handle
+        // the failure silently
+
+        // ...
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_COARSE_LOCATION: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "coarse location permission granted");
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Functionality limited");
+                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                        }
+
+                    });
+                    builder.show();
+                }
+                return;
+            }
+        }
+    }
+
 
 }
