@@ -10,11 +10,11 @@
         android:id="@+id/buttonPrescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
         android:text="Take a snapshot of your prescription"
         tools:layout_editor_absoluteX="37dp"
-        tools:layout_editor_absoluteY="16dp" />
+        tools:layout_editor_absoluteY="16dp"
+        android:layout_above="@+id/imageView"
+        android:layout_centerHorizontal="true" />
 
     <ImageView
         android:id="@+id/imageView"

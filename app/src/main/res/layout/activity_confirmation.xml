@@ -6,6 +6,63 @@
     android:layout_height="match_parent"
     tools:context="com.example.charleychau.prism.Confirmation">
 
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="46dp"
+        android:text="Name:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:layout_below="@+id/buttonChoosePharm" />
+
+    <TextView
+        android:id="@+id/textViewPharmName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView4"
+        android:layout_alignBottom="@+id/textView4"
+        android:layout_marginStart="12dp"
+        android:layout_toEndOf="@+id/textView4"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Address:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:id="@+id/textViewPharmNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView8"
+        android:layout_alignBottom="@+id/textView8"
+        android:layout_marginStart="11dp"
+        android:layout_toEndOf="@+id/textView8"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Phone Number:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:layout_below="@+id/buttonChoosePharm"
+        android:layout_marginTop="105dp" />
+
+    <TextView
+        android:id="@+id/textViewPharmAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView6"
+        android:layout_alignBottom="@+id/textView6"
+        android:layout_alignStart="@+id/buttonChoosePharm"
+        android:layout_marginStart="11dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
     <EditText
         android:id="@+id/editTextUID"
         android:layout_width="fill_parent"
@@ -44,10 +101,10 @@
         android:id="@+id/buttonChoosePharm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="81dp"
+        android:layout_marginTop="38dp"
         android:text="Choose your pharmacy"
         tools:layout_editor_absoluteX="93dp"
-        tools:layout_editor_absoluteY="158dp" />
+        tools:layout_editor_absoluteY="158dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

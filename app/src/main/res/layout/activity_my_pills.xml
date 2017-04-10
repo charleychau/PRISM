@@ -6,21 +6,32 @@
     android:layout_height="match_parent"
     tools:context="com.example.charleychau.prism.MyPills">
 
+    <Button
+        android:id="@+id/buttonRemind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/buttonAdd"
+        android:layout_alignBottom="@+id/buttonAdd"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="64dp"
+        android:text="Reminders" />
+
     <ListView
         android:id="@+id/listViewPills"
         android:layout_width="fill_parent"
-        android:layout_height="420dp"
+        android:layout_height="415dp"
         android:layout_alignParentEnd="true"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="75dp" />
 
-    <ImageButton
-        android:id="@+id/imageButton"
-        android:layout_width="58dp"
-        android:layout_height="52dp"
+    <Button
+        android:id="@+id/buttonAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="18dp"
+        android:text="Add More"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        app:srcCompat="@android:drawable/ic_input_add"
-        tools:layout_editor_absoluteX="310dp"
-        tools:layout_editor_absoluteY="443dp" />
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="55dp" />
+
 </RelativeLayout>
