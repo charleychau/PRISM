@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.RemoteException;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,8 +29,11 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.Region;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.Locale;
+
 import android.os.Handler;
 
 public class MyPills extends AppCompatActivity implements BeaconConsumer{
@@ -50,11 +54,24 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
     private Button addButton;
     private Button remindButton;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
+    TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_pills);
+
+        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = tts.setLanguage(Locale.US);
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.e(TAG, "This language is not supported");
+                    }
+                }
+            }
+        });
 
         //user = (User) getIntent().getSerializableExtra("USER");
         //pill = (Pill) getIntent().getSerializableExtra("PILL");
@@ -80,6 +97,9 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                 adapter.clear();
                 adapter.addAll(filteredArray);
                 //TODO: Can put text to speech here
+
+                String phrase = "Hello User. Your pills that you need to take include the following: ";
+                speak(tts, phrase);
             }
         });
         adapter = new AdapterPill(this, R.layout.list_pill_layout);
@@ -249,5 +269,13 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
 
         // Showing Alert Message
         alertDialog.show();
+    }
+
+    private void speak(TextToSpeech tts, String text) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+        } else {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+        }
     }
 }
