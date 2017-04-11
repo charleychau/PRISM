@@ -91,10 +91,6 @@ public class Snapshot extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PICTURE_RESULT){
             if (resultCode == RESULT_OK) {
-                Context context = getApplicationContext();
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, "RESULT CANCELLED", duration);
-                toast.show();
                 try {
                     Log.d("yeeeeeeeeeee", "activity result " + imageUri);
                     imageBitmap = (Bitmap) data.getExtras().get("data");

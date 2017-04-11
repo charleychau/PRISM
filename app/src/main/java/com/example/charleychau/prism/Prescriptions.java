@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -122,8 +123,10 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
                 //TODO: send bitmap to node final String endpointBitmap = server + "/" + prescription;
                 StringRequest srPharm = new StringRequest(Request.Method.POST, endpointPharm, responseListener, errorListener);
                 StringRequest srNotification = new StringRequest(Request.Method.POST, endpointNotification, responseListener, errorListener);
+                StringRequest srImage = new StringRequest(Request.Method.POST, endpointImage, responseListener, errorListener);
                 queue.add(srPharm);
                 queue.add(srNotification);
+                queue.add(srImage);
             }
         });
 
@@ -141,6 +144,19 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
                 Intent returnMain = new Intent(Prescriptions.this, MainActivity.class);
                 returnMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(returnMain);
+
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        Context context = getApplicationContext();
+                        int duration = Toast.LENGTH_SHORT;
+                        Toast toast = Toast.makeText(context, "Prescription is Ready!", duration);
+                        toast.show();
+                    }
+
+                }, 7500); // 5000ms delay
             }
         };
 

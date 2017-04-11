@@ -53,6 +53,9 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
     private String instance;
     private Button addButton;
     private Button remindButton;
+    private boolean pillExists;
+    private boolean pillExists2;
+    private boolean filtered = false;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     TextToSpeech tts;
 
@@ -74,7 +77,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         });
 
         //user = (User) getIntent().getSerializableExtra("USER");
-        //pill = (Pill) getIntent().getSerializableExtra("PILL");
+        pill = (Pill) getIntent().getSerializableExtra("PILL");
         pillsList = (ListView) findViewById(R.id.listViewPills);
         addButton = (Button) findViewById(R.id.buttonAdd);
         remindButton = (Button) findViewById(R.id.buttonRemind);
@@ -96,6 +99,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                 }
                 adapter.clear();
                 adapter.addAll(filteredArray);
+                filtered = true;
                 //TODO: Can put text to speech here
 
                 String phrase = "Hello User. Your pills that you need to take include the following: ";
@@ -107,12 +111,46 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         pillsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                showPillInfo(position);
+                if (filtered == true) {
+                    showPillInfo(position, filteredArray);
+                }
+                else {
+                    showPillInfo(position, pillsArray);
+                }
             }
         });
         pillsArray = (ArrayList<Pill>) getIntent().getSerializableExtra("PILLS_ARRAY");
         //userArray.add(user);
-        //pillsArray.add(pill);
+
+        Pill pill2 = new Pill("99", "Hydrocodone", "10", "1", "1", "2F234454F4911BA9FFA6", "000000000002", "Tom", "1");
+        for (int x = 0; x < pillsArray.size(); x++) {
+            if(pillsArray.size() == 0) {
+                pillsArray.add(pill2);
+                pillExists2 = true;
+            }
+            else if(pillsArray.get(x).getName().equals(pill2.getName())) {
+                pillExists2 = true;
+            }
+        }
+        if (pillExists2 == false) {
+            pillsArray.add(pill2);
+            pillExists2 = true;
+        }
+
+        for (int x = 0; x < pillsArray.size(); x++) {
+            if(pillsArray.size() == 0) {
+                pillsArray.add(pill);
+                pillExists = true;
+            }
+            else if(pillsArray.get(x).getName().equals(pill.getName())) {
+                pillExists = true;
+            }
+        }
+        if (pillExists == false) {
+            pillsArray.add(pill);
+            pillExists = true;
+
+        }
         adapter.clear();
         adapter.addAll(pillsArray);
 
@@ -176,9 +214,29 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         Region region = new Region("John", Identifier.parse("2F234454F4911BA9FFA6"), Identifier.parse("000000000003"), null);
         beaconManager.addMonitorNotifier(new MonitorNotifier() {
             @Override
-            public void didEnterRegion(Region region) {
+            public void didEnterRegion(final Region region) {
                 if (region.getId1() == null || region.getId2() == null) return;
                 Log.i(TAG, "Beacon found: " + region.toString());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (region.getUniqueId() == "John"){
+                            Toast.makeText(MyPills.this, "Reached Beacon Code from didEnterRegion", Toast.LENGTH_SHORT).show();
+                            //TODO: Get reminders for pills and filter array
+                            for (int i = 0; i < pillsArray.size(); i++) {
+                                if (pillsArray.get(i).getNamespace().equals("2F234454F4911BA9FFA6")  &&
+                                        pillsArray.get(i).getInstance().equals("000000000003")) {
+                                    filteredArray.add(pillsArray.get(i));
+                                }
+                            }
+                            adapter.clear();
+                            adapter.addAll(filteredArray);
+                            filtered = true;
+                            pillsList.invalidateViews();
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+                });
             }
 
             @Override
@@ -207,7 +265,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         @Override
                         public void run() {
                             if (region.getUniqueId() == "John"){
-
+                                Toast.makeText(MyPills.this, "Reached Beacon Code from didDetermineStateForRegion", Toast.LENGTH_SHORT).show();
                                 //TODO: Get reminders for pills and filter array
                                 for (int i = 0; i < pillsArray.size(); i++) {
                                     if (pillsArray.get(i).getNamespace().equals("2F234454F4911BA9FFA6")  &&
@@ -217,6 +275,9 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                                 }
                                 adapter.clear();
                                 adapter.addAll(filteredArray);
+                                filtered = true;
+                                pillsList.invalidateViews();
+                                adapter.notifyDataSetChanged();
                             }
                         }
                     });
@@ -231,10 +292,10 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         }
     }
 
-    public void showPillInfo(int pos){
+    public void showPillInfo(int pos, ArrayList<Pill> array){
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
-        final Pill pill = pillsArray.get(pos);
+        final Pill pill = array.get(pos);
 
         // Setting Dialog Title
         alertDialog.setTitle(pill.getName());
@@ -262,7 +323,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         toast.show();
                     }
 
-                }, 15000); // 5000ms delay
+                }, 7500); // 5000ms delay
 
             }
         });

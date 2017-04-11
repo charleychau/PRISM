@@ -73,12 +73,13 @@ public class MyCameraActivity extends AppCompatActivity {
     private Uri imageToUploadUri;
     private ArrayList<Pill> pillsArray = new ArrayList<>();
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
+    JSONObject obj = new JSONObject();
 
     static {
-        ORIENTATIONS.append(Surface.ROTATION_0, 90);
-        ORIENTATIONS.append(Surface.ROTATION_90, 0);
-        ORIENTATIONS.append(Surface.ROTATION_180, 270);
-        ORIENTATIONS.append(Surface.ROTATION_270, 180);
+        ORIENTATIONS.append(Surface.ROTATION_0, 0);
+        ORIENTATIONS.append(Surface.ROTATION_90, 270);
+        ORIENTATIONS.append(Surface.ROTATION_180, 180);
+        ORIENTATIONS.append(Surface.ROTATION_270, 90);
     }
 
     private String cameraId;
@@ -90,6 +91,7 @@ public class MyCameraActivity extends AppCompatActivity {
     private ImageReader imageReader;
     private File file;
     private static final int REQUEST_CAMERA_PERMISSION = 200;
+    int PILL_REQUEST = 2;
     private boolean mFlashSupported;
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread = new HandlerThread("Camera Background");
@@ -364,11 +366,13 @@ public class MyCameraActivity extends AppCompatActivity {
                 {
                     MyCameraActivity.this.imageView = (ImageView)MyCameraActivity.this.findViewById(R.id.imageView1);
                     imageView.setImageBitmap(arr[0]);
+                    imageView.setRotation(90);
                 }
                 if(arr[1]!=null)
                 {
                     MyCameraActivity.this.imageView = (ImageView)MyCameraActivity.this.findViewById(R.id.imageView2);
                     imageView.setImageBitmap(arr[1]);
+                    imageView.setRotation(90);
                 }
                 else
                 {
@@ -378,36 +382,13 @@ public class MyCameraActivity extends AppCompatActivity {
                 {
                     MyCameraActivity.this.imageView = (ImageView)MyCameraActivity.this.findViewById(R.id.imageView3);
                     imageView.setImageBitmap(arr[2]);
+                    imageView.setRotation(90);
                 }
                 if(arr[3]!=null)
                 {
                     MyCameraActivity.this.imageView = (ImageView)MyCameraActivity.this.findViewById(R.id.imageView4);
                     imageView.setImageBitmap(arr[3]);
-                }
-                if(arr[4]!=null)
-                {
-                    MyCameraActivity.this.imageView = (ImageView)MyCameraActivity.this.findViewById(R.id.imageView5);
-                    imageView.setImageBitmap(arr[4]);
-                }
-                if(arr[5]!=null)
-                {
-                    MyCameraActivity.this.imageView = (ImageView)MyCameraActivity.this.findViewById(R.id.imageView6);
-                    imageView.setImageBitmap(arr[5]);
-                }
-                if(arr[6]!=null)
-                {
-                    MyCameraActivity.this.imageView = (ImageView)MyCameraActivity.this.findViewById(R.id.imageView7);
-                    imageView.setImageBitmap(arr[6]);
-                }
-                if(arr[7]!=null)
-                {
-                    MyCameraActivity.this.imageView = (ImageView)MyCameraActivity.this.findViewById(R.id.imageView8);
-                    imageView.setImageBitmap(arr[7]);
-                }
-                if(arr[8]!=null)
-                {
-                    MyCameraActivity.this.imageView = (ImageView)MyCameraActivity.this.findViewById(R.id.imageView9);
-                    imageView.setImageBitmap(arr[8]);
+                    imageView.setRotation(90);
                 }
 
                 if(reducedSizeBitmap != null){
@@ -552,13 +533,13 @@ public class MyCameraActivity extends AppCompatActivity {
     }
 
     public Bitmap[] createBitmaps(Bitmap source) {
-        Bitmap[] bmp = new Bitmap[9];
+        Bitmap[] bmp = new Bitmap[4];
         int k = 0;
         int width = source.getWidth();
         int height = source.getHeight();
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++, k++) {
-                bmp[k] = Bitmap.createBitmap(source, (width * j) / 3, (i * height) / 3, width / 3, height / 3);
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++, k++) {
+                bmp[k] = Bitmap.createBitmap(source, (width * j) / 2, (i * height) / 2, width / 2, height / 2);
                 try
                 {
                     if (bmp[k] == null)
@@ -575,40 +556,31 @@ public class MyCameraActivity extends AppCompatActivity {
                     MultiFormatReader reader = new MultiFormatReader();
                     try
                     {
-                        //TODO: Does this handle multiple QR codes?
                         Result result = reader.decode(bBitmap);
 
-                        //TODO: take string and manipulate
                         Log.d("UID/PID info from QR",result.toString());  // INFO FROM SERVER IS HERE
                         String info = result.toString();
-                        //TODO: give me string delimited by commas only
-                        //TODO: give me more info so I can create a pill
-                        //TODO: need to make sure I only get each qr code once
-                        //String info = "{"uid":"MMXPNP"}";
-                        JSONObject obj = new JSONObject(info);
-                        Toast.makeText(MyCameraActivity.this, "PID: " + obj.getString("pid"), Toast.LENGTH_SHORT).show();
-                        String delims = "[,]";
-                        String[] tokens = info.split(delims);
-                        String uid = obj.getString("uid");
+                        try {
+                            obj = new JSONObject(info);
+                        } catch (JSONException e) {
+                            Log.e("MYAPP", "unexpected JSON exception", e);
+                        }
                         String pid = obj.getString("pid");
-                        String name = obj.getString("name");
-                        String quantity = obj.getString("quantity");
+                        String pillname = obj.getString("name");
+                        String amount = obj.getString("quantity");
+                        String username = obj.getString("uname");
                         String refills = obj.getString("refills");
+                        /*String month = obj.getString("month");
+                        String day = obj.getString("day");
+                        String year = obj.getString("year");*/
 
-                        boolean pillExists = false;
-                        Pill pill = new Pill(pid, name, "14", quantity, "2", "2F234454F4911BA9FFA6", "000000000003", "John", refills);
-                        for (int x = 0; x <= pillsArray.size(); x++) {
-                            if(pillsArray.get(x).equals(pill.getName())) {
-                                pillExists = true;
-                            }
-                        }
-                        if (pillExists == false) {
-                            pillsArray.add(pill);
-                        }
+                        Pill pill = new Pill(pid, pillname, "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", username, refills);
+                        //User user = new User("John", "123456", "2F234454F4911BA9FFA6", "000000000003");
 
                         Intent addPills = new Intent(MyCameraActivity.this, MyPills.class);
+                        addPills.putExtra("PILL", pill);
                         addPills.putExtra("PILLS_ARRAY", pillsArray);
-                        startActivityForResult(addPills, 1);
+                        startActivityForResult(addPills, PILL_REQUEST);
                     }
                     catch (NotFoundException e)
                     {

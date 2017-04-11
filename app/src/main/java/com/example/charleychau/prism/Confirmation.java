@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
@@ -68,6 +70,8 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
     private ArrayList<User> userList;
     private ArrayList<Pill> pillsArray = new ArrayList<Pill>();
     private boolean pillExists = false;
+    private boolean pillExists2 = false;
+    JSONObject obj = new JSONObject();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,36 +115,32 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                 //QR gives uid, pid, pill name, pill quantity, amount of refills, times
                 //If new user, node will give uid
                 String str = response;
-                //JSONParser parser = new JSONParser();
-
-
-
-
-                //User user = new User(uid, "ads", "asdb", null);
-                //Pill pill = new Pill("a", "s", "e", "a", "4", user);
-                //pillList.add(pill);
-
-                /*Context context = getApplicationContext();
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, "RESPONSE RECEIVED", duration);
-                toast.show();*/
-
-                /*for (int i = 0; i < pillList.size(); i++) {
-                    if (pill.getName().equals(pillList.get(i).getName()) && user.getUid().equals(pillList.get(i).getUser())) {
-                        // Pill is already on the list
-                        pillExists = true;
-                        break;
+                try {
+                    try {
+                        obj = new JSONObject(str);
+                    } catch (JSONException e) {
+                        Log.e("MYAPP", "unexpected JSON exception", e);
                     }
+                    String pid = obj.getString("pid");
+                    String pillname = obj.getString("name");
+                    String amount = obj.getString("quantity");
+                    String username = obj.getString("uname");
+                    String refills = obj.getString("refills");
+                    String month = obj.getString("month");
+                    String day = obj.getString("day");
+                    String year = obj.getString("year");
+
+                    Pill pill = new Pill(pid, pillname, "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", username, refills);
+                    //User user = new User("John", "123456", "2F234454F4911BA9FFA6", "000000000003");
+
+                    Intent addPills = new Intent(Confirmation.this, MyPills.class);
+                    addPills.putExtra("PILL", pill);
+                    addPills.putExtra("PILLS_ARRAY", pillsArray);
+                    startActivityForResult(addPills, PILL_REQUEST);
                 }
+                catch (JSONException e){
 
-                if (pillExists = false) {
-                    pillList.add(pill);
-                }*/
-
-                /*Intent addPills = new Intent(Confirmation.this, MyPills.class);
-                addPills.putExtra("PILL_LIST", pillList);
-                startActivity(addPills);*/
-
+                }
             }
         };
 
@@ -156,7 +156,8 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                 uid = userid.getText().toString().substring(0,6);
                 pid = userid.getText().toString().substring(6,8);
 
-                /*SimpleDateFormat df = new SimpleDateFormat("MM/dd/yy");
+                //Date code for user authentication
+                SimpleDateFormat df = new SimpleDateFormat("MM/dd/yy");
                 Date myDate;
                 String bday = dob.getText().toString();
                 Calendar c = Calendar.getInstance();
@@ -168,7 +169,7 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                 }
                 dayOfMonth = String.valueOf(c.get(Calendar.DAY_OF_MONTH));
                 month = String.valueOf(c.get(Calendar.MONTH) + 1);
-                year = String.valueOf(c.get(Calendar.YEAR));*/
+                year = String.valueOf(c.get(Calendar.YEAR));
 
                 //TODO: Send to node
                 /*final String endpointUID = server + "/pharm/check_uid/" + uid;
@@ -178,29 +179,14 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                 queue.add(srUID);
                 queue.add(srPID);*/
 
-                //If confirmed, go to My Pills
-
-                Pill pill = new Pill("78", "Adderall", "20", "1", "2", "2F234454F4911BA9FFA6", "000000000001", "John", "3");
-                //Pill pill2 = new Pill("78", "Ibuprofen", "20", "1", "2", "2F234454F4911BA9FFA6", "000000000002", "John", "3");
-                pillsArray.add(pill);
-                //pillsArray.add(pill2);
-                User user = new User("John", "123456", "2F234454F4911BA9FFA6", "000000000003");
+                //Following code is for implementation without node
+                //User user = new User("John", "123456", "2F234454F4911BA9FFA6", "000000000003");
+                Pill pill = new Pill("78", "Adderall", "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", "John", "3");
 
                 Intent addPills = new Intent(Confirmation.this, MyPills.class);
+                addPills.putExtra("PILL", pill);
                 addPills.putExtra("PILLS_ARRAY", pillsArray);
                 startActivityForResult(addPills, PILL_REQUEST);
-
-                /*Intent showPills = new Intent(Confirmation.this, MyPills.class);
-                showPills.putExtra("USER", user);
-                showPills.putExtra("PILL", pill);
-                startActivity(showPills);*/
-                /*
-                //If not, try again
-                Context context = getApplicationContext();
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, "Confirmation Failed!", duration);
-                toast.show();
-                */
             }
         });
     }
@@ -231,8 +217,6 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
         // An unresolvable error has occurred and a connection to Google APIs
         // could not be established. Display an error message, or handle
         // the failure silently
-
-        // ...
     }
 
     @Override

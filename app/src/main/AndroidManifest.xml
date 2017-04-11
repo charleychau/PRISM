@@ -42,7 +42,8 @@
 
         <activity android:name=".Confirmation" />
         <activity android:name=".MyPills"></activity>
-        <activity android:name=".MyCameraActivity" />
+        <activity android:name=".MyCameraActivity"
+            android:screenOrientation="portrait"/>
 
         <!--
         <receiver android:name=".TTSReceiver">
