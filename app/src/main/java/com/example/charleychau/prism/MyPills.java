@@ -22,6 +22,12 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
 import org.altbeacon.beacon.BeaconConsumer;
@@ -30,6 +36,8 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.Region;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
@@ -57,17 +65,24 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
     private Button remindButton;
     private boolean pillExists;
     private boolean pillExists2;
+    private boolean pillExists3;
     private boolean filtered = false;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     private static final int PERMISSION_REQUEST_SEND_SMS = 1;
     private TextToSpeech tts;
     private SmsManager sms;
+    private RequestQueue queue;
+    private Response.Listener<String> responseListener;
+    private Response.ErrorListener errorListener;
+    private String server = "http://10.0.1.5:8080";
+    private String refillPill;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_pills);
 
+        // Text to speech
         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -79,16 +94,47 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                 }
             }
         });
+        // SMS
         sms = SmsManager.getDefault();
         //requestPermissions(new String[]{Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SEND_SMS);
 
-        //user = (User) getIntent().getSerializableExtra("USER");
-        pill = (Pill) getIntent().getSerializableExtra("PILL");
+        // Handle Volley
+        queue = Volley.newRequestQueue(this);
+        responseListener = new Response.Listener<String> () {
+            @Override
+            public void onResponse(String response) {
+                Log.i(TAG, "Response is: " + response);
+                String str = response;
+                Boolean ready = null;
+                try {
+                    JSONObject obj = new JSONObject(str);
+                    ready = obj.getBoolean("ready");
+                    if (ready) {
+                        text("8133896108", "Your refill request for " + refillPill + " is ready.");
+                        Log.d("debug", "refill request ready received");
+                        Toast.makeText(MyPills.this, "Your refill request for " + refillPill + " is ready.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+                catch (JSONException e){
+                }
+
+            }
+        };
+        errorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Error is: " + error.toString());
+            }
+        };
+
+        // Initialize views
         pillsList = (ListView) findViewById(R.id.listViewPills);
         addButton = (Button) findViewById(R.id.buttonAdd);
         remindButton = (Button) findViewById(R.id.buttonRemind);
         addButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                // Add Button sends user back to confirmation screen
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("RESULT_ARRAY", pillsArray);
                 setResult(Activity.RESULT_OK, resultIntent);
@@ -97,19 +143,18 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         });
         remindButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                // Filters pills for beacon with instance of 3
                 for (int i = 0; i < pillsArray.size(); i++) {
                     if (pillsArray.get(i).getNamespace().equals("2F234454F4911BA9FFA6")  &&
                             pillsArray.get(i).getInstance().equals("000000000003")) {
                         filteredArray.add(pillsArray.get(i));
                     }
                 }
-                Pill pill2 = new Pill("78", "Charley", "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", "John", "3");
-                filteredArray.add(pill2);
                 adapter.clear();
                 adapter.addAll(filteredArray);
                 filtered = true;
-                //TODO: Can put text to speech here
 
+                // Handle audio feedback
                 String phrase = "Hello User. Your pills that you need to take include the following: You need to take ";
                 speak(tts, phrase);
 
@@ -120,7 +165,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                     public void run() {
                         for (int i = 0; i < filteredArray.size(); i++) {
                             currPill = filteredArray.get(i);
-                            String reminder = currPill.getAmount() + " " + currPill.getName() + " ";
+                            String reminder = currPill.getPillPerUse() + " " + currPill.getName() + " ";
                             speak(tts, reminder);
                             try {
                                 synchronized (this) {
@@ -130,11 +175,49 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         }
                     }
 
-                }, 5000); // 5000ms delay
+                }, 5000);
 
+                // If the user is in range, assume the pills were taken
+                for (int i = 0; i < filteredArray.size(); i++) {
+                    filteredArray.get(i).setQuantity(Integer.toString(Integer.parseInt(filteredArray.get(i).getQuantity()) -
+                            Integer.parseInt(filteredArray.get(i).getPillPerUse())));
+                }
 
+                Log.d("debug", "reached after setQuantity");
+
+                // Goes through personal pill list and checks if any pills need to be refilled
+                for (int i = 0; i < filteredArray.size(); i++) {
+                    if (Integer.parseInt(filteredArray.get(i).getQuantity()) <= 5) {
+                        final String uid = filteredArray.get(i).getUid();
+                        final String pid = filteredArray.get(i).getPid();
+
+                        final String requestRefill = server + "/pharm/refill/" + uid + "/" + pid;
+                        StringRequest srRequestRefill = new StringRequest(Request.Method.POST, requestRefill, responseListener, errorListener);
+                        queue.add(srRequestRefill);
+                        refillPill = filteredArray.get(i).getName();
+                        //text("8133896108", "A refill request for " + filteredArray.get(i).getName() + " was sent.");
+                        Toast.makeText(MyPills.this, "A refil request for " + filteredArray.get(i).getName() + " was sent.",
+                                Toast.LENGTH_SHORT).show();
+                        Log.d("debug", "refill request sent");
+
+                        final int finalI = i;
+                        handler.postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                final String checkRefill = server + "/pharm/refill_ready/" + uid + "/" + pid;
+                                StringRequest srCheckRefill = new StringRequest(Request.Method.GET, checkRefill, responseListener, errorListener);
+                                queue.add(srCheckRefill);
+                                Log.d("debug", "refill request ready sent");
+                            }
+
+                        }, 10000);
+                    }
+                }
             }
         });
+
+        // Set up adapter to populate listView
         adapter = new AdapterPill(this, R.layout.list_pill_layout);
         pillsList.setAdapter(adapter);
         pillsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -148,10 +231,15 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                 }
             }
         });
-        pillsArray = (ArrayList<Pill>) getIntent().getSerializableExtra("PILLS_ARRAY");
-        //userArray.add(user);
 
-        Pill pill2 = new Pill("99", "Hydrocodone", "10", "1", "1", "2F234454F4911BA9FFA6", "000000000002", "Tom", "1");
+        // Retrieve pill from intent
+        pill = (Pill) getIntent().getSerializableExtra("PILL");
+        // Retrieve pill array from intent
+        pillsArray = (ArrayList<Pill>) getIntent().getSerializableExtra("PILLS_ARRAY");
+
+        // Default pill2
+        Pill pill2 = new Pill("99", "Hydrocodone", "2F234454F4911BA9FFA6", "000000000003", "Tom", "1", "6", "1", "1", "1", "789456");
+        // Go through pill array and add the default pill if not already in the list
         for (int x = 0; x < pillsArray.size(); x++) {
             if(pillsArray.size() == 0) {
                 pillsArray.add(pill2);
@@ -166,6 +254,24 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
             pillExists2 = true;
         }
 
+        // Default pill3
+        Pill pill3 = new Pill("78", "Humira", "2F234454F4911BA9FFA6", "000000000004", "Julian", "1", "10", "1", "2", "3", "486521");
+        // Go through pill array and add the default pill if not already in the list
+        for (int x = 0; x < pillsArray.size(); x++) {
+            if(pillsArray.size() == 0) {
+                pillsArray.add(pill3);
+                pillExists3 = true;
+            }
+            else if(pillsArray.get(x).getName().equals(pill3.getName())) {
+                pillExists3 = true;
+            }
+        }
+        if (pillExists3 == false) {
+            pillsArray.add(pill3);
+            pillExists3 = true;
+        }
+
+        // Add pill from intent to list if not already in list
         for (int x = 0; x < pillsArray.size(); x++) {
             if(pillsArray.size() == 0) {
                 pillsArray.add(pill);
@@ -183,6 +289,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         adapter.clear();
         adapter.addAll(pillsArray);
 
+        // Handle beacon location access
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Android M Permission check 
             if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -239,7 +346,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
 
     @Override
     public void onBeaconServiceConnect() {
-        // Regions can also be defined in terms of their bleutooth MAC address.
+        // Regions can also be defined in terms of their bluetooth MAC address.
         Region region = new Region("John", Identifier.parse("2F234454F4911BA9FFA6"), Identifier.parse("000000000003"), null);
         beaconManager.addMonitorNotifier(new MonitorNotifier() {
             @Override
@@ -295,7 +402,6 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         public void run() {
                             if (region.getUniqueId() == "John"){
                                 Toast.makeText(MyPills.this, "Reached Beacon Code from didDetermineStateForRegion", Toast.LENGTH_SHORT).show();
-                                //TODO: Get reminders for pills and filter array
                                 for (int i = 0; i < pillsArray.size(); i++) {
                                     if (pillsArray.get(i).getNamespace().equals("2F234454F4911BA9FFA6")  &&
                                             pillsArray.get(i).getInstance().equals("000000000003")) {
@@ -321,6 +427,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         }
     }
 
+    // Shows info about a pill in a dialog pop-up window
     public void showPillInfo(int pos, ArrayList<Pill> array){
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
@@ -330,30 +437,12 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         alertDialog.setTitle(pill.getName());
 
         // Setting Dialog Message
-        alertDialog.setMessage("Pill Owner: " + pill.getOwner() + "\nPill ID: " + pill.getPid() + "\nPill Duration: " +
-                pill.getDuration() + "\nPill Amount: " + pill.getAmount() + "\nPill Times/Day: " + pill.getTimes());
+        alertDialog.setMessage("Pill Owner: " + pill.getUname() + "\nPill ID: " + pill.getPid() + "\nRefills left: " +
+                pill.getRefills() + "\nPill Quantity: " + pill.getQuantity() + "\nPills Per Use: " + pill.getPillPerUse());
 
-        alertDialog.setNegativeButton("Refill", new DialogInterface.OnClickListener() {
+        alertDialog.setNegativeButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                Context context = getApplicationContext();
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, "Refill Request Sent!", duration);
-                toast.show();
-
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Context context = getApplicationContext();
-                        int duration = Toast.LENGTH_SHORT;
-                        Toast toast = Toast.makeText(context, pill.getName() + " Refill Ready For Pickup!", duration);
-                        toast.show();
-                    }
-
-                }, 7500); // 5000ms delay
-
             }
         });
 

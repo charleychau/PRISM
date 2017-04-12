@@ -415,7 +415,7 @@ public class MyCameraActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        //populatePills(arr);
+        populatePills(arr);
         Log.d("populate", "REACHED END OF TAKE PICTURE 2");
         return arr;
     }
@@ -597,7 +597,71 @@ public class MyCameraActivity extends AppCompatActivity {
         boolean pill3present = false;
         boolean pill4present = false;
         boolean fromCamera = true;
-        for (int i = 0; i < arr.length; i++) {
+
+        for (int k = 0; k < 4; k++) {
+            try
+            {
+                if (arr[k] == null)
+                {
+                    Log.e("bitmap", "uri is not a bitmap");
+                }
+                int thewidth = arr[k].getWidth();
+                int theheight = arr[k].getHeight();
+                int[] pixels = new int[thewidth * theheight];
+                arr[k].getPixels(pixels, 0, thewidth, 0, 0, thewidth, theheight);
+                RGBLuminanceSource thesource = new RGBLuminanceSource(thewidth, theheight, pixels);
+                BinaryBitmap bBitmap = new BinaryBitmap(new HybridBinarizer(thesource));
+                MultiFormatReader reader = new MultiFormatReader();
+                try
+                {
+                    Result result = reader.decode(bBitmap);
+                    Log.d("UID/PID info from QR",result.toString());  // INFO FROM SERVER IS HERE
+                    String info = result.toString();
+                    try {
+                        obj = new JSONObject(info);
+                        String pid = obj.getString("pid");
+                        String pillname = obj.getString("name");
+                        String username = obj.getString("uname");
+                        String refills = obj.getString("refills");
+                        String quantity = obj.getString("quantity");
+                        String pillPerUse = obj.getString("pillPerUse");
+                        String start = obj.getString("start");
+                        String times = obj.getString("time");
+
+                        /*switch (k) {
+                            case 0: pill1 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", username, refills, quantity, pillPerUse, start, times);
+                                pill1present = true;
+                                break;
+                            case 1: pill2 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", username, refills, quantity, pillPerUse, start, times);
+                                pill2present = true;
+                                break;
+                            case 2: pill3 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", username, refills, quantity, pillPerUse, start, times);
+                                pill3present = true;
+                                break;
+                            case 3: pill4 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", username, refills, quantity, pillPerUse, start, times);
+                                pill4present = true;
+                                break;
+                        }*/
+                    } catch (JSONException e) {
+                        Log.e("MYAPP", "unexpected JSON exception", e);
+                    }
+                }
+                catch (NotFoundException e)
+                {
+                    //TODO: This means pill bottle gone, make logic for taking pills
+                    Log.e("bitmap", "decode exception", e);
+                    //return null;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.e("bitmap", "can not open file");
+                //return null;
+            }
+        }
+
+
+        /*for (int i = 0; i < arr.length; i++) {
             Result currResult = res.get(i);
             String info = currResult.toString();
             try {
@@ -607,9 +671,9 @@ public class MyCameraActivity extends AppCompatActivity {
                 String amount = obj.getString("quantity");
                 String username = obj.getString("uname");
                 String refills = obj.getString("refills");
-                /*String month = obj.getString("month");
+                String month = obj.getString("month");
                 String day = obj.getString("day");
-                String year = obj.getString("year");*/
+                String year = obj.getString("year");
                 switch (i) {
                     case 0: pill1 = new Pill(pid, pillname, "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", username, refills);
                         pill1present = true;
@@ -627,11 +691,9 @@ public class MyCameraActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 Log.e("MYAPP", "unexpected JSON exception", e);
             }
-        }
+        }*/
 
-        Toast.makeText(MyCameraActivity.this, "REACHED POPULATE PILLS", Toast.LENGTH_LONG).show();
         Log.d("populate", "REACHED POPULATE PILLS");
-        //todo TEST CAMERA
 
         Intent addPills = new Intent(MyCameraActivity.this, MyPills.class);
         if (pill1present) addPills.putExtra("PILL1", pill1);

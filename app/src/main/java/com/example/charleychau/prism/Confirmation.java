@@ -40,7 +40,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 
-//TODO: endpoint response for refill amount and refill ready
 public class Confirmation extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
 
     private Button pharmacyButton;
@@ -78,6 +77,7 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_confirmation);
 
+        // Initialize views
         name = (TextView) findViewById(R.id.textViewPharmName);
         address = (TextView) findViewById(R.id.textViewPharmAddress);
         number = (TextView) findViewById(R.id.textViewPharmNumber);
@@ -86,6 +86,7 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
         userid = (EditText) findViewById(R.id.editTextUID);
         dob = (EditText) findViewById(R.id.editTextDOB);
 
+        // Initialize Google API Client
         mGoogleApiClient = new GoogleApiClient
                 .Builder(this)
                 .addApi(Places.GEO_DATA_API)
@@ -93,6 +94,7 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                 .enableAutoManage(this, this)
                 .build();
 
+        // Picks pharmacy info
         pharmacyButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
@@ -100,22 +102,19 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                     startActivityForResult(builder.build(Confirmation.this), PLACE_PICKER_REQUEST);
                 }
                 catch (Exception ex) {
-
                 }
             }
         });
 
+        // Handle Volley
         queue = Volley.newRequestQueue(this);
         responseListener = new Response.Listener<String> () {
             @Override
             public void onResponse(String response) {
                 Log.i(TAG, "Response is: " + response);
 
-                //TODO: get info for user and pill from QR/Manual
-                //QR gives uid, pid, pill name, pill quantity, amount of refills, times
-                //If new user, node will give uid
                 String str = response;
-                try {
+                /*try {
                     try {
                         obj = new JSONObject(str);
                     } catch (JSONException e) {
@@ -123,14 +122,14 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                     }
                     String pid = obj.getString("pid");
                     String pillname = obj.getString("name");
-                    String amount = obj.getString("quantity");
                     String username = obj.getString("uname");
                     String refills = obj.getString("refills");
-                    String month = obj.getString("month");
-                    String day = obj.getString("day");
-                    String year = obj.getString("year");
+                    String quantity = obj.getString("quantity");
+                    String pillPerUse = obj.getString("pillPerUse");
+                    String start = obj.getString("start");
+                    String times = obj.getString("time");
 
-                    Pill pill = new Pill(pid, pillname, "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", username, refills);
+                    Pill pill = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", username, refills, quantity, pillPerUse, start, times);
                     //User user = new User("John", "123456", "2F234454F4911BA9FFA6", "000000000003");
 
                     Intent addPills = new Intent(Confirmation.this, MyPills.class);
@@ -139,8 +138,7 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                     startActivityForResult(addPills, PILL_REQUEST);
                 }
                 catch (JSONException e){
-
-                }
+                }*/
             }
         };
 
@@ -151,13 +149,17 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
             }
         };
 
+        // Manually adds a pill to the pill list
         confirmButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+
+                // Use 78945645 as UID for Tom and Adderall
+                // Use 12345678 as UID for Michael and Abilify
                 uid = userid.getText().toString().substring(0,6);
                 pid = userid.getText().toString().substring(6,8);
 
                 //Date code for user authentication
-                SimpleDateFormat df = new SimpleDateFormat("MM/dd/yy");
+                /*SimpleDateFormat df = new SimpleDateFormat("MM/dd/yy");
                 Date myDate;
                 String bday = dob.getText().toString();
                 Calendar c = Calendar.getInstance();
@@ -169,24 +171,29 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                 }
                 dayOfMonth = String.valueOf(c.get(Calendar.DAY_OF_MONTH));
                 month = String.valueOf(c.get(Calendar.MONTH) + 1);
-                year = String.valueOf(c.get(Calendar.YEAR));
+                year = String.valueOf(c.get(Calendar.YEAR));*/
 
-                //TODO: Send to node
-                /*final String endpointUID = server + "/pharm/check_uid/" + uid;
-                final String endpointPID = server + "/pharm/check_pid/" + uid + "/" + pid;
-                StringRequest srUID = new StringRequest(Request.Method.GET, endpointUID, responseListener, errorListener);
-                StringRequest srPID = new StringRequest(Request.Method.GET, endpointPID, responseListener, errorListener);
-                queue.add(srUID);
-                queue.add(srPID);*/
+                /*final String requestRefill = server + "/pharm/refill/" + uid + "/" + pid;
+                final String checkRefill = server + "/pharm/refill_ready/" + uid + "/" + pid;
+                StringRequest srRequestRefill = new StringRequest(Request.Method.POST, requestRefill, responseListener, errorListener);
+                StringRequest srCheckRefill = new StringRequest(Request.Method.GET, checkRefill, responseListener, errorListener);
+                queue.add(srRequestRefill);
+                queue.add(srCheckRefill);*/
 
                 //Following code is for implementation without node
-                //User user = new User("John", "123456", "2F234454F4911BA9FFA6", "000000000003");
-                Pill pill = new Pill("78", "Adderall", "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", "John", "3");
+                if (pid.equals("45") && uid.equals("789456")) {
+                    Pill pill = new Pill(pid, "Adderall", "2F234454F4911BA9FFA6", "000000000003", "Tom", "3", "30", "1", "2", "3", uid);
+                    Intent addPills = new Intent(Confirmation.this, MyPills.class);
+                    addPills.putExtra("PILL", pill);
+                    addPills.putExtra("PILLS_ARRAY", pillsArray);
+                    startActivityForResult(addPills, PILL_REQUEST);
+                }
+                if (pid.equals("78") && uid.equals("123456")) {
+                    Pill pill = new Pill(pid, "Abilify", "2F234454F4911BA9FFA6", "000000000003", "Tom", "3", "30", "1", "2", "3", uid);
+                }
 
-                Intent addPills = new Intent(Confirmation.this, MyPills.class);
-                addPills.putExtra("PILL", pill);
-                addPills.putExtra("PILLS_ARRAY", pillsArray);
-                startActivityForResult(addPills, PILL_REQUEST);
+
+
             }
         });
     }
@@ -202,7 +209,6 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                 name.setText(chosenPharm);
                 address.setText(chosenAddress);
                 number.setText(chosenNumber);
-                //TODO: Display map of location
             }
         }
         else if (requestCode == PILL_REQUEST) {

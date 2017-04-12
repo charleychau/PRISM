@@ -58,7 +58,7 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
     private TextView number;
     private Bitmap placeBitmap;
     private RequestQueue queue;
-    private String server = "";
+    private String server = "http://10.0.1.5:8080";
     private Response.Listener<String> responseListener;
     private Response.ErrorListener errorListener;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
@@ -75,6 +75,7 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_prescriptions);
 
+        // Initialize views
         pharmacyButton = (Button) findViewById(R.id.buttonPharmacy);
         radioNotificationGroup = (RadioGroup) findViewById(R.id.radioNotification);
         sendButton = (Button) findViewById(R.id.buttonSend);
@@ -85,6 +86,7 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
         Bundle extras = getIntent().getExtras();
         prescription = (Bitmap) extras.getParcelable("prescription");
 
+        // Initialize Google API Client
         mGoogleApiClient = new GoogleApiClient
                 .Builder(this)
                 .addApi(Places.GEO_DATA_API)
@@ -92,6 +94,7 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
                 .enableAutoManage(this, this)
                 .build();
 
+        // Chooses pharmacy
         pharmacyButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
@@ -104,23 +107,23 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
             }
         });
 
+        // Sends image to node
         sendButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                int selectedId = radioNotificationGroup.getCheckedRadioButtonId();
+                //int selectedId = radioNotificationGroup.getCheckedRadioButtonId();
                 // find the radiobutton by returned id
-                radioNotificationButton = (RadioButton) findViewById(selectedId);
-                notification = radioNotificationButton.getText().toString();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                //radioNotificationButton = (RadioButton) findViewById(selectedId);
+                //notification = radioNotificationButton.getText().toString();
 
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 prescription.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
                 byte[] b = baos.toByteArray();
                 String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
 
-                //TODO: send info to node
+                // Send info to node
                 //final String endpointPharm = server + "/" + chosenPharm;
                 //final String endpointNotification = server + "/" + notification;
-                final String endpointImage = server + "/" + encodedImage;
-                //TODO: send bitmap to node final String endpointBitmap = server + "/" + prescription;
+                final String endpointImage = server + "/pharm/prescription/" + encodedImage;
                 //StringRequest srPharm = new StringRequest(Request.Method.POST, endpointPharm, responseListener, errorListener);
                 //StringRequest srNotification = new StringRequest(Request.Method.POST, endpointNotification, responseListener, errorListener);
                 StringRequest srImage = new StringRequest(Request.Method.POST, endpointImage, responseListener, errorListener);
@@ -130,15 +133,20 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
             }
         });
 
+        // Handle Volley
         queue = Volley.newRequestQueue(this);
+
+        // On response from server, receive text that prescription has been sent and ready
         responseListener = new Response.Listener<String> () {
             @Override
             public void onResponse(String response) {
                 Log.i(TAG, "Response is: " + response);
 
+                //TODO: IMPLEMENT TEXT IN PRESCRIPTIONS
+                //text("8133896108", "Your prescription has been sent.");
                 Context context = getApplicationContext();
                 int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, "Prescription Sent!", duration);
+                Toast toast = Toast.makeText(context, "Refill Request Sent!", duration);
                 toast.show();
 
                 Intent returnMain = new Intent(Prescriptions.this, MainActivity.class);
@@ -150,7 +158,7 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
 
                     @Override
                     public void run() {
-                        //TODO: put a phone text notification here
+                        //text("8133896108", "Your prescription is now ready.");
                     }
 
                 }, 10000);

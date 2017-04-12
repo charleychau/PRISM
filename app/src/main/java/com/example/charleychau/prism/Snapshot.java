@@ -37,6 +37,7 @@ public class Snapshot extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snapshot);
 
+        // Initialize views
         prescriptionButton = (Button) findViewById(R.id.buttonPrescription);
         imageView = (ImageView) findViewById(R.id.imageView);
         nextButton = (Button) findViewById(R.id.buttonNext);
@@ -45,6 +46,7 @@ public class Snapshot extends AppCompatActivity {
 
         startIntent();
 
+        // Starts camera to take picture of prescription
         prescriptionButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -59,6 +61,7 @@ public class Snapshot extends AppCompatActivity {
             }
         });
 
+        // Progress to the next activity and send picture through intent
         nextButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent addPrescription = new Intent(Snapshot.this, Prescriptions.class);
@@ -69,23 +72,6 @@ public class Snapshot extends AppCompatActivity {
             }
         });
     }
-
-    /*@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE){
-            if (resultCode == RESULT_OK) {
-                Bundle extras = data.getExtras();
-                imageBitmap = (Bitmap) extras.get("data");
-                imageView.setImageBitmap(imageBitmap);
-            }
-            else if (resultCode == RESULT_CANCELED){
-                Context context = getApplicationContext();
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, "RESULT CANCELLED", duration);
-                toast.show();
-            }
-        }
-    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -101,34 +87,6 @@ public class Snapshot extends AppCompatActivity {
                 }
             }
         }
-
-        /*if (requestCode == REQUEST_IMAGE_CAPTURE){
-            if (resultCode == RESULT_OK) {
-                try {
-                    imageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-                    imageView.setImageBitmap(imageBitmap);
-                    //imageurl = getRealPathFromURI(imageUri);
-                    Context context = getApplicationContext();
-                    int duration = Toast.LENGTH_SHORT;
-                    Toast toast = Toast.makeText(context, "Screenshot Taken", duration);
-                    toast.show();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            else {
-                Context context = getApplicationContext();
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, "Wront result code", duration);
-                toast.show();
-            }
-        }
-        else {
-            Context context = getApplicationContext();
-            int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(context, "Wrong requestcode", duration);
-            toast.show();
-        }*/
     }
 
     public String getRealPathFromURI(Uri contentUri) {
