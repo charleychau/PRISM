@@ -49,6 +49,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
     private String pid;
     private User user;
     private Pill pill;
+    private Pill currPill;
     private String namespace;
     private String instance;
     private Button addButton;
@@ -97,13 +98,36 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         filteredArray.add(pillsArray.get(i));
                     }
                 }
+                Pill pill2 = new Pill("78", "Charley", "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", "John", "3");
+                filteredArray.add(pill2);
                 adapter.clear();
                 adapter.addAll(filteredArray);
                 filtered = true;
                 //TODO: Can put text to speech here
 
-                String phrase = "Hello User. Your pills that you need to take include the following: ";
+                String phrase = "Hello User. Your pills that you need to take include the following: You need to take ";
                 speak(tts, phrase);
+
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        for (int i = 0; i < filteredArray.size(); i++) {
+                            currPill = filteredArray.get(i);
+                            String reminder = currPill.getAmount() + " " + currPill.getName() + " ";
+                            speak(tts, reminder);
+                            try {
+                                synchronized (this) {
+                                    wait(1500);
+                                }
+                            } catch (InterruptedException ex) {}
+                        }
+                    }
+
+                }, 5000); // 5000ms delay
+
+
             }
         });
         adapter = new AdapterPill(this, R.layout.list_pill_layout);

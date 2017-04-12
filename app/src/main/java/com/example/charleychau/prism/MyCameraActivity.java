@@ -40,6 +40,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import org.json.JSONObject;
 import org.json.JSONException;
@@ -71,15 +72,16 @@ public class MyCameraActivity extends AppCompatActivity {
     private static final String TAG = "API";
     private TextureView textureView;
     private Uri imageToUploadUri;
+    private Pill pill;
     private ArrayList<Pill> pillsArray = new ArrayList<>();
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     JSONObject obj = new JSONObject();
 
     static {
-        ORIENTATIONS.append(Surface.ROTATION_0, 0);
-        ORIENTATIONS.append(Surface.ROTATION_90, 270);
-        ORIENTATIONS.append(Surface.ROTATION_180, 180);
-        ORIENTATIONS.append(Surface.ROTATION_270, 90);
+        ORIENTATIONS.append(Surface.ROTATION_0, 90);
+        ORIENTATIONS.append(Surface.ROTATION_90, 0);
+        ORIENTATIONS.append(Surface.ROTATION_180, 270);
+        ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
 
     private String cameraId;
@@ -92,9 +94,14 @@ public class MyCameraActivity extends AppCompatActivity {
     private File file;
     private static final int REQUEST_CAMERA_PERMISSION = 200;
     int PILL_REQUEST = 2;
+    private Pill pill1;
+    private Pill pill2;
+    private Pill pill3;
+    private Pill pill4;
     private boolean mFlashSupported;
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread = new HandlerThread("Camera Background");
+    private ArrayList<Result> res = new ArrayList<>();
 
     // Storage Permissions
     // private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -143,8 +150,8 @@ public class MyCameraActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d("almost", "click was registered");
-                start();
-                //takePicture();
+                //start();
+                takePicture();
             }
         });
         Button stopper = (Button) findViewById(R.id.button2);
@@ -405,6 +412,8 @@ public class MyCameraActivity extends AppCompatActivity {
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
+
+        populatePills(res);
         return arr;
     }
 
@@ -503,14 +512,14 @@ public class MyCameraActivity extends AppCompatActivity {
         }
     }
 
-    @Override
+    /*@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
                 pillsArray = (ArrayList<Pill>) data.getSerializableExtra("RESULT_ARRAY");
             }
         }
-    }
+    }*/
 
     @Override
     protected void onResume() {
@@ -557,30 +566,8 @@ public class MyCameraActivity extends AppCompatActivity {
                     try
                     {
                         Result result = reader.decode(bBitmap);
-
+                        res.add(result);
                         Log.d("UID/PID info from QR",result.toString());  // INFO FROM SERVER IS HERE
-                        String info = result.toString();
-                        try {
-                            obj = new JSONObject(info);
-                        } catch (JSONException e) {
-                            Log.e("MYAPP", "unexpected JSON exception", e);
-                        }
-                        String pid = obj.getString("pid");
-                        String pillname = obj.getString("name");
-                        String amount = obj.getString("quantity");
-                        String username = obj.getString("uname");
-                        String refills = obj.getString("refills");
-                        /*String month = obj.getString("month");
-                        String day = obj.getString("day");
-                        String year = obj.getString("year");*/
-
-                        Pill pill = new Pill(pid, pillname, "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", username, refills);
-                        //User user = new User("John", "123456", "2F234454F4911BA9FFA6", "000000000003");
-
-                        Intent addPills = new Intent(MyCameraActivity.this, MyPills.class);
-                        addPills.putExtra("PILL", pill);
-                        addPills.putExtra("PILLS_ARRAY", pillsArray);
-                        startActivityForResult(addPills, PILL_REQUEST);
                     }
                     catch (NotFoundException e)
                     {
@@ -598,6 +585,57 @@ public class MyCameraActivity extends AppCompatActivity {
         }
         // now check the QR values in these images
         return bmp;
+    }
+
+    private void populatePills (ArrayList<Result> res) {
+        boolean pill1present = false;
+        boolean pill2present = false;
+        boolean pill3present = false;
+        boolean pill4present = false;
+        boolean fromCamera = true;
+        for (int i = 0; i < res.size(); i++) {
+            Result currResult = res.get(i);
+            String info = currResult.toString();
+            try {
+                obj = new JSONObject(info);
+                String pid = obj.getString("pid");
+                String pillname = obj.getString("name");
+                String amount = obj.getString("quantity");
+                String username = obj.getString("uname");
+                String refills = obj.getString("refills");
+                /*String month = obj.getString("month");
+                String day = obj.getString("day");
+                String year = obj.getString("year");*/
+                switch (i) {
+                    case 0: pill1 = new Pill(pid, pillname, "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", username, refills);
+                        pill1present = true;
+                        break;
+                    case 1: pill2 = new Pill(pid, pillname, "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", username, refills);
+                        pill2present = true;
+                        break;
+                    case 2: pill3 = new Pill(pid, pillname, "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", username, refills);
+                        pill3present = true;
+                        break;
+                    case 3: pill4 = new Pill(pid, pillname, "20", "1", "2", "2F234454F4911BA9FFA6", "000000000003", username, refills);
+                        pill4present = true;
+                        break;
+                }
+            } catch (JSONException e) {
+                Log.e("MYAPP", "unexpected JSON exception", e);
+            }
+        }
+
+        Toast.makeText(MyCameraActivity.this, "REACHED POPULATE PILLS", Toast.LENGTH_LONG).show();
+        Log.d("CHARLEY", "REACHED POPULATE PILLS");
+        //todo TEST CAMERA
+
+        Intent addPills = new Intent(MyCameraActivity.this, MyPills.class);
+        if (pill1present) addPills.putExtra("PILL1", pill1);
+        if (pill2present) addPills.putExtra("PILL2", pill2);
+        if (pill3present) addPills.putExtra("PILL3", pill3);
+        if (pill4present) addPills.putExtra("PILL4", pill4);
+        addPills.putExtra("FROM_CAMERA", fromCamera);
+        startActivity(addPills);
     }
 
     private Bitmap getBitmap(String path) {

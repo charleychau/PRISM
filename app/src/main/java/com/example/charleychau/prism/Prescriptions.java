@@ -117,15 +117,15 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
                 String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
 
                 //TODO: send info to node
-                final String endpointPharm = server + "/" + chosenPharm;
-                final String endpointNotification = server + "/" + notification;
+                //final String endpointPharm = server + "/" + chosenPharm;
+                //final String endpointNotification = server + "/" + notification;
                 final String endpointImage = server + "/" + encodedImage;
                 //TODO: send bitmap to node final String endpointBitmap = server + "/" + prescription;
-                StringRequest srPharm = new StringRequest(Request.Method.POST, endpointPharm, responseListener, errorListener);
-                StringRequest srNotification = new StringRequest(Request.Method.POST, endpointNotification, responseListener, errorListener);
+                //StringRequest srPharm = new StringRequest(Request.Method.POST, endpointPharm, responseListener, errorListener);
+                //StringRequest srNotification = new StringRequest(Request.Method.POST, endpointNotification, responseListener, errorListener);
                 StringRequest srImage = new StringRequest(Request.Method.POST, endpointImage, responseListener, errorListener);
-                queue.add(srPharm);
-                queue.add(srNotification);
+                //queue.add(srPharm);
+                //queue.add(srNotification);
                 queue.add(srImage);
             }
         });
@@ -156,7 +156,8 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
                         toast.show();
                     }
 
-                }, 7500); // 5000ms delay
+                }, 10000); // 5000ms delay
+                //TODO: put a phone text notification here
             }
         };
 
