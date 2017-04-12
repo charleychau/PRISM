@@ -151,10 +151,6 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
                     @Override
                     public void run() {
                         //TODO: put a phone text notification here
-                        Context context = getApplicationContext();
-                        int duration = Toast.LENGTH_SHORT;
-                        Toast toast = Toast.makeText(context, "Prescription is Ready!", duration);
-                        toast.show();
                     }
 
                 }, 10000);

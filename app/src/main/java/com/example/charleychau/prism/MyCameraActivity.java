@@ -404,6 +404,8 @@ public class MyCameraActivity extends AppCompatActivity {
                 }else{
                     Toast.makeText(MyCameraActivity.this,"Error while capturing Image1",Toast.LENGTH_LONG).show();
                 }
+                //populatePills(arr);
+                Log.d("populate", "REACHED END OF TAKE PICTURE 1");
                 return arr;
             }else{
                 Toast.makeText(MyCameraActivity.this,"Error while capturing Image2",Toast.LENGTH_LONG).show();
@@ -413,7 +415,8 @@ public class MyCameraActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        populatePills(res);
+        //populatePills(arr);
+        Log.d("populate", "REACHED END OF TAKE PICTURE 2");
         return arr;
     }
 
@@ -566,7 +569,7 @@ public class MyCameraActivity extends AppCompatActivity {
                     try
                     {
                         Result result = reader.decode(bBitmap);
-                        res.add(result);
+                        //res.add(result);
                         Log.d("UID/PID info from QR",result.toString());  // INFO FROM SERVER IS HERE
                     }
                     catch (NotFoundException e)
@@ -584,16 +587,17 @@ public class MyCameraActivity extends AppCompatActivity {
             }
         }
         // now check the QR values in these images
+        Log.d("populate", "REACHED END OF CREATE BITMAPS");
         return bmp;
     }
 
-    private void populatePills (ArrayList<Result> res) {
+    private void populatePills (Bitmap[] arr) {
         boolean pill1present = false;
         boolean pill2present = false;
         boolean pill3present = false;
         boolean pill4present = false;
         boolean fromCamera = true;
-        for (int i = 0; i < res.size(); i++) {
+        for (int i = 0; i < arr.length; i++) {
             Result currResult = res.get(i);
             String info = currResult.toString();
             try {
@@ -626,7 +630,7 @@ public class MyCameraActivity extends AppCompatActivity {
         }
 
         Toast.makeText(MyCameraActivity.this, "REACHED POPULATE PILLS", Toast.LENGTH_LONG).show();
-        Log.d("CHARLEY", "REACHED POPULATE PILLS");
+        Log.d("populate", "REACHED POPULATE PILLS");
         //todo TEST CAMERA
 
         Intent addPills = new Intent(MyCameraActivity.this, MyPills.class);
