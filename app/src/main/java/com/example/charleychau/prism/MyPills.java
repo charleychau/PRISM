@@ -291,7 +291,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
 
         // Handle beacon location access
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // Android M Permission check 
+            // Android M Permission check
             if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("This app needs location access");
@@ -450,7 +450,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         alertDialog.show();
     }
 
-    private void speak(TextToSpeech tts, String text) {
+    private void speak(String text) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
         } else {
@@ -460,6 +460,5 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
 
     private void text(String phoneNumber, String smsContent) {
         sms.sendTextMessage(phoneNumber, null, smsContent, null, null);
-
     }
 }

@@ -45,6 +45,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import android.telephony.SmsManager;
+import android.speech.tts.TextToSpeech;
+
+
 public class Prescriptions extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
 
     private Button pharmacyButton;
@@ -69,11 +73,35 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
     private String notification;
     private Bitmap prescription;
     PlacePhotoMetadataBuffer photoMetadataBuffer;
+    
+    private SmsManager sms;
+    private static final int PERMISSION_REQUEST_BEACONS_AND_SMS = 2;
+    private TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_prescriptions);
+
+        // Set up both TTS and SMS
+        // Text to speech
+        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = tts.setLanguage(Locale.US);
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.e(TAG, "This language is not supported");
+                    }
+                }
+            }
+        });
+        // SMS
+        sms = SmsManager.getDefault();
+        requestPermissions(new String[]{
+            Manifest.permission.SEND_SMS,
+            Manifest.permission.ACCESS_COARSE_LOCATION },
+            PERMISSION_REQUEST_BEACONS_AND_SMS);
 
         // Initialize views
         pharmacyButton = (Button) findViewById(R.id.buttonPharmacy);
@@ -236,8 +264,41 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
                 }
                 return;
             }
+            
+            // Permisssion request response from the onCreate() function.
+            case PERMISSION_REQUEST_BEACONS_AND_SMS: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "SMS IO access and coarse location permission granted");
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Functionality limited");
+                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                        }
+
+                    });
+                    builder.show();
+                }
+                return;
+            }
+        }
+    }
+    
+    // Speak the specified text using the internal text to speech engine.
+    private void speak(String text) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+        } else {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
         }
     }
 
-
+    // Send an SMS message to the phone number with supplied sms content.
+    private void text(String phoneNumber, String smsContent) {
+        sms.sendTextMessage(phoneNumber, null, smsContent, null, null);
+    }
 }
