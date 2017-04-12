@@ -404,7 +404,7 @@ public class MyCameraActivity extends AppCompatActivity {
                 }else{
                     Toast.makeText(MyCameraActivity.this,"Error while capturing Image1",Toast.LENGTH_LONG).show();
                 }
-                //populatePills(arr);
+                populatePills(arr);
                 Log.d("populate", "REACHED END OF TAKE PICTURE 1");
                 return arr;
             }else{
@@ -569,7 +569,6 @@ public class MyCameraActivity extends AppCompatActivity {
                     try
                     {
                         Result result = reader.decode(bBitmap);
-                        //res.add(result);
                         Log.d("info from QR in create",result.toString());  // INFO FROM SERVER IS HERE
                     }
                     catch (NotFoundException e)
@@ -592,11 +591,11 @@ public class MyCameraActivity extends AppCompatActivity {
     }
 
     private void populatePills (Bitmap[] arr) {
+        Log.d("populate", "REACHED POPULATE PILLS");
         boolean pill1present = false;
         boolean pill2present = false;
         boolean pill3present = false;
         boolean pill4present = false;
-        boolean fromCamera = true;
 
         for (int k = 0; k < arr.length; k++) {
             try
@@ -619,29 +618,35 @@ public class MyCameraActivity extends AppCompatActivity {
                     String info = result.toString();
                     try {
                         obj = new JSONObject(info);
+                        String uid = obj.getString("uid");
                         String pid = obj.getString("pid");
                         String pillname = obj.getString("name");
-                        String username = obj.getString("uname");
+                        String uname = obj.getString("uname");
                         String refills = obj.getString("refills");
                         String quantity = obj.getString("quantity");
-                        String pillPerUse = obj.getString("pillPerUse");
+                        String pillPerUse = obj.getString("pill_per_use");
                         String start = obj.getString("start");
-                        String times = obj.getString("time");
+                        //String times = obj.getString("time");
+                        String times = "13";
 
-                        /*switch (k) {
-                            case 0: pill1 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", username, refills, quantity, pillPerUse, start, times);
+                        switch (k) {
+                            case 0: pill1 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", uname, refills,
+                                    quantity, pillPerUse, start, times, uid);
                                 pill1present = true;
                                 break;
-                            case 1: pill2 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", username, refills, quantity, pillPerUse, start, times);
+                            case 1: pill2 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000001", uname, refills,
+                                    quantity, pillPerUse, start, times, uid);
                                 pill2present = true;
                                 break;
-                            case 2: pill3 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", username, refills, quantity, pillPerUse, start, times);
+                            case 2: pill3 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000001", uname, refills,
+                                    quantity, pillPerUse, start, times, uid);
                                 pill3present = true;
                                 break;
-                            case 3: pill4 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", username, refills, quantity, pillPerUse, start, times);
+                            case 3: pill4 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000002", uname, refills,
+                                    quantity, pillPerUse, start, times, uid);
                                 pill4present = true;
                                 break;
-                        }*/
+                        }
                     } catch (JSONException e) {
                         Log.e("MYAPP", "unexpected JSON exception", e);
                     }
@@ -660,6 +665,7 @@ public class MyCameraActivity extends AppCompatActivity {
             }
         }
 
+        Log.d ("populate", "CREATED PILLS FINE");
 
         /*for (int i = 0; i < arr.length; i++) {
             Result currResult = res.get(i);
@@ -693,14 +699,19 @@ public class MyCameraActivity extends AppCompatActivity {
             }
         }*/
 
-        Log.d("populate", "REACHED POPULATE PILLS");
+        Log.d("populate", "REACHED BEFORE INTENTS");
 
         Intent addPills = new Intent(MyCameraActivity.this, MyPills.class);
         if (pill1present) addPills.putExtra("PILL1", pill1);
         if (pill2present) addPills.putExtra("PILL2", pill2);
         if (pill3present) addPills.putExtra("PILL3", pill3);
         if (pill4present) addPills.putExtra("PILL4", pill4);
-        addPills.putExtra("FROM_CAMERA", fromCamera);
+        addPills.putExtra("FROM_CAMERA", true);
+        addPills.putExtra("FROM_MAIN", false);
+        addPills.putExtra("P1_PRESENT", pill1present);
+        addPills.putExtra("P2_PRESENT", pill2present);
+        addPills.putExtra("P3_PRESENT", pill3present);
+        addPills.putExtra("P4_PRESENT", pill4present);
         startActivity(addPills);
     }
 

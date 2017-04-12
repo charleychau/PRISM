@@ -187,6 +187,7 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                     addPills.putExtra("PILL", pill);
                     addPills.putExtra("PILLS_ARRAY", pillsArray);
                     addPills.putExtra("FROM_MAIN", false);
+                    addPills.putExtra("FROM_CAMERA", false);
                     startActivityForResult(addPills, PILL_REQUEST);
                 }
                 if (pid.equals("78") && uid.equals("123456")) {
@@ -195,6 +196,7 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                     addPills.putExtra("PILL", pill);
                     addPills.putExtra("PILLS_ARRAY", pillsArray);
                     addPills.putExtra("FROM_MAIN", false);
+                    addPills.putExtra("FROM_CAMERA", false);
                     startActivityForResult(addPills, PILL_REQUEST);
                 }
             }

@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent goMyPills = new Intent(MainActivity.this, MyPills.class);
                 goMyPills.putExtra("FROM_MAIN", true);
+                goMyPills.putExtra("FROM_CAMERA", false);
                 startActivity(goMyPills);
             }
         });

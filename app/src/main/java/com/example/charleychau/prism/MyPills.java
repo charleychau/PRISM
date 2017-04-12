@@ -67,6 +67,10 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
     private boolean pillExists;
     private boolean pillExists2;
     private boolean pillExists3;
+    private boolean intPillExists1;
+    private boolean intPillExists2;
+    private boolean intPillExists3;
+    private boolean intPillExists4;
     private boolean filtered = false;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     private static final int PERMISSION_REQUEST_SEND_SMS = 1;
@@ -77,6 +81,10 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
     private Response.ErrorListener errorListener;
     private String server = "http://10.0.1.5:8080";
     private String refillPill;
+    private Pill intPill1;
+    private Pill intPill2;
+    private Pill intPill3;
+    private Pill intPill4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -240,12 +248,20 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
             }
         });
 
-        // If from main, just show pill list with current pills. If not, add pill from intent.
-        if (getIntent().getExtras().getBoolean("FROM_MAIN") == false) {
+        // If from main, just show pill list with current pills. If not, add pill from intent
+        if (getIntent().getExtras().getBoolean("FROM_MAIN") == false && getIntent().getExtras().getBoolean("FROM_CAMERA") == false) {
             // Retrieve pill from intent
             pill = (Pill) getIntent().getSerializableExtra("PILL");
             // Retrieve pill array from intent
             pillsArray = (ArrayList<Pill>) getIntent().getSerializableExtra("PILLS_ARRAY");
+        }
+        // If from camera, add all four pills conditionally
+        else if (getIntent().getExtras().getBoolean("FROM_CAMERA") == true) {
+            if (getIntent().getExtras().getBoolean("P1_PRESENT") == true) intPill1 = (Pill) getIntent().getSerializableExtra("PILL1");
+            if (getIntent().getExtras().getBoolean("P2_PRESENT") == true) intPill2 = (Pill) getIntent().getSerializableExtra("PILL2");
+            if (getIntent().getExtras().getBoolean("P3_PRESENT") == true) intPill3 = (Pill) getIntent().getSerializableExtra("PILL3");
+            if (getIntent().getExtras().getBoolean("P4_PRESENT") == true) intPill4 = (Pill) getIntent().getSerializableExtra("PILL4");
+            pillsArray = new ArrayList<>();
         }
         else {
             pillsArray = new ArrayList<>();
@@ -325,7 +341,8 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                     pill3.getQuantity() + "\nPills Per Use: " + pill3.getPillPerUse() + "\nTake During: " + start);*/
         }
 
-        if (getIntent().getExtras().getBoolean("FROM_MAIN") == false) {
+        // If intent is from confirmation
+        if (getIntent().getExtras().getBoolean("FROM_MAIN") == false && getIntent().getExtras().getBoolean("FROM_CAMERA") == false) {
             // Add pill from intent to list if not already in list
             for (int x = 0; x < pillsArray.size(); x++) {
                 if(pillsArray.size() == 0) {
@@ -359,6 +376,136 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                 text("8133896108", pill.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + pill.getUname() +
                         "\nPill ID: " + pill.getPid() + "\nRefills left: " + pill.getRefills() + "\nPill Quantity: " +
                         pill.getQuantity() + "\nPills Per Use: " + pill.getPillPerUse() + "\nTake During: " + start);
+            }
+        }
+
+        //TODO May need to debug
+        // If intent is from camera
+        if (getIntent().getExtras().getBoolean("FROM_CAMERA") == true) {
+            // Add pill from intent to list if not already in list
+            for (int x = 0; x < pillsArray.size(); x++) {
+                if(pillsArray.size() == 0) {
+                    if (getIntent().getExtras().getBoolean("P1_PRESENT") == true) {
+                        pillsArray.add(intPill1);
+                        intPillExists1 = true;
+                        Toast.makeText(MyPills.this, intPill1.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                                Toast.LENGTH_SHORT).show();
+                        String start = null;
+                        if (intPill1.getStart().equals("1")) start = "Morning";
+                        if (intPill1.getStart().equals("2")) start = "Afternoon";
+                        if (intPill1.getStart().equals("3")) start = "Evening";
+                        text("8133896108", intPill1.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + intPill1.getUname() +
+                                "\nPill ID: " + intPill1.getPid() + "\nRefills left: " + intPill1.getRefills() + "\nPill Quantity: " +
+                                intPill1.getQuantity() + "\nPills Per Use: " + intPill1.getPillPerUse() + "\nTake During: " + start);
+                    }
+                    if (getIntent().getExtras().getBoolean("P2_PRESENT") == true) {
+                        pillsArray.add(intPill2);
+                        intPillExists2 = true;
+                        Toast.makeText(MyPills.this, intPill2.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                                Toast.LENGTH_SHORT).show();
+                        String start = null;
+                        if (intPill2.getStart().equals("1")) start = "Morning";
+                        if (intPill2.getStart().equals("2")) start = "Afternoon";
+                        if (intPill2.getStart().equals("3")) start = "Evening";
+                        text("8133896108", intPill2.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + intPill2.getUname() +
+                                "\nPill ID: " + intPill2.getPid() + "\nRefills left: " + intPill2.getRefills() + "\nPill Quantity: " +
+                                intPill2.getQuantity() + "\nPills Per Use: " + intPill2.getPillPerUse() + "\nTake During: " + start);
+                    }
+                    if (getIntent().getExtras().getBoolean("P3_PRESENT") == true) {
+                        pillsArray.add(intPill3);
+                        intPillExists3 = true;
+                        Toast.makeText(MyPills.this, intPill3.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                                Toast.LENGTH_SHORT).show();
+                        String start = null;
+                        if (intPill3.getStart().equals("1")) start = "Morning";
+                        if (intPill3.getStart().equals("2")) start = "Afternoon";
+                        if (intPill3.getStart().equals("3")) start = "Evening";
+                        text("8133896108", intPill3.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + intPill3.getUname() +
+                                "\nPill ID: " + intPill3.getPid() + "\nRefills left: " + intPill3.getRefills() + "\nPill Quantity: " +
+                                intPill3.getQuantity() + "\nPills Per Use: " + intPill3.getPillPerUse() + "\nTake During: " + start);
+                    }
+                    if (getIntent().getExtras().getBoolean("P4_PRESENT") == true) {
+                        pillsArray.add(intPill4);
+                        intPillExists4 = true;
+                        Toast.makeText(MyPills.this, intPill4.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                                Toast.LENGTH_SHORT).show();
+                        String start = null;
+                        if (intPill4.getStart().equals("1")) start = "Morning";
+                        if (intPill4.getStart().equals("2")) start = "Afternoon";
+                        if (intPill4.getStart().equals("3")) start = "Evening";
+                        text("8133896108", intPill4.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + intPill4.getUname() +
+                                "\nPill ID: " + intPill4.getPid() + "\nRefills left: " + intPill4.getRefills() + "\nPill Quantity: " +
+                                intPill4.getQuantity() + "\nPills Per Use: " + intPill4.getPillPerUse() + "\nTake During: " + start);
+                    }
+                }
+                else if(pillsArray.get(x).getName().equals(intPill1.getName())) {
+                    intPillExists1 = true;
+                }
+                else if(pillsArray.get(x).getName().equals(intPill2.getName())) {
+                    intPillExists2 = true;
+                }
+                else if(pillsArray.get(x).getName().equals(intPill3.getName())) {
+                    intPillExists3 = true;
+                }
+                else if(pillsArray.get(x).getName().equals(intPill4.getName())) {
+                    intPillExists4 = true;
+                }
+            }
+            if (intPillExists1 == false) {
+                pillsArray.add(intPill1);
+                intPillExists1 = true;
+
+                Toast.makeText(MyPills.this, intPill1.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                        Toast.LENGTH_SHORT).show();
+                String start = null;
+                if (intPill1.getStart().equals("1")) start = "Morning";
+                if (intPill1.getStart().equals("2")) start = "Afternoon";
+                if (intPill1.getStart().equals("3")) start = "Evening";
+                text("8133896108", intPill1.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + intPill1.getUname() +
+                        "\nPill ID: " + intPill1.getPid() + "\nRefills left: " + intPill1.getRefills() + "\nPill Quantity: " +
+                        intPill1.getQuantity() + "\nPills Per Use: " + intPill1.getPillPerUse() + "\nTake During: " + start);
+            }
+            else if (intPillExists2 == false) {
+                pillsArray.add(intPill2);
+                intPillExists2 = true;
+
+                Toast.makeText(MyPills.this, intPill2.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                        Toast.LENGTH_SHORT).show();
+                String start = null;
+                if (intPill2.getStart().equals("1")) start = "Morning";
+                if (intPill2.getStart().equals("2")) start = "Afternoon";
+                if (intPill2.getStart().equals("3")) start = "Evening";
+                text("8133896108", intPill2.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + intPill2.getUname() +
+                        "\nPill ID: " + intPill2.getPid() + "\nRefills left: " + intPill2.getRefills() + "\nPill Quantity: " +
+                        intPill2.getQuantity() + "\nPills Per Use: " + intPill2.getPillPerUse() + "\nTake During: " + start);
+            }
+            else if (intPillExists3 == false) {
+                pillsArray.add(intPill3);
+                intPillExists3 = true;
+
+                Toast.makeText(MyPills.this, intPill3.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                        Toast.LENGTH_SHORT).show();
+                String start = null;
+                if (intPill3.getStart().equals("1")) start = "Morning";
+                if (intPill3.getStart().equals("2")) start = "Afternoon";
+                if (intPill3.getStart().equals("3")) start = "Evening";
+                text("8133896108", intPill3.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + intPill3.getUname() +
+                        "\nPill ID: " + intPill3.getPid() + "\nRefills left: " + intPill3.getRefills() + "\nPill Quantity: " +
+                        intPill3.getQuantity() + "\nPills Per Use: " + intPill3.getPillPerUse() + "\nTake During: " + start);
+            }
+            else if (intPillExists4 == false) {
+                pillsArray.add(intPill4);
+                intPillExists4 = true;
+
+                Toast.makeText(MyPills.this, intPill4.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                        Toast.LENGTH_SHORT).show();
+                String start = null;
+                if (intPill4.getStart().equals("1")) start = "Morning";
+                if (intPill4.getStart().equals("2")) start = "Afternoon";
+                if (intPill4.getStart().equals("3")) start = "Evening";
+                text("8133896108", intPill4.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + intPill4.getUname() +
+                        "\nPill ID: " + intPill4.getPid() + "\nRefills left: " + intPill4.getRefills() + "\nPill Quantity: " +
+                        intPill4.getQuantity() + "\nPills Per Use: " + intPill4.getPillPerUse() + "\nTake During: " + start);
             }
         }
 
