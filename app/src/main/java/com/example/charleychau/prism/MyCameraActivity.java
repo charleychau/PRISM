@@ -570,7 +570,7 @@ public class MyCameraActivity extends AppCompatActivity {
                     {
                         Result result = reader.decode(bBitmap);
                         //res.add(result);
-                        Log.d("UID/PID info from QR",result.toString());  // INFO FROM SERVER IS HERE
+                        Log.d("info from QR in create",result.toString());  // INFO FROM SERVER IS HERE
                     }
                     catch (NotFoundException e)
                     {
@@ -598,7 +598,7 @@ public class MyCameraActivity extends AppCompatActivity {
         boolean pill4present = false;
         boolean fromCamera = true;
 
-        for (int k = 0; k < 4; k++) {
+        for (int k = 0; k < arr.length; k++) {
             try
             {
                 if (arr[k] == null)
@@ -615,7 +615,7 @@ public class MyCameraActivity extends AppCompatActivity {
                 try
                 {
                     Result result = reader.decode(bBitmap);
-                    Log.d("UID/PID info from QR",result.toString());  // INFO FROM SERVER IS HERE
+                    Log.d("info from QR in populat",result.toString());  // INFO FROM SERVER IS HERE
                     String info = result.toString();
                     try {
                         obj = new JSONObject(info);

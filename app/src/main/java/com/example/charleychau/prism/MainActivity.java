@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     private Button hubButton;
     private Button uidButton;
     private Button prescriptionButton;
+    private Button pillsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         hubButton = (Button) findViewById(R.id.buttonHub);
         uidButton = (Button) findViewById(R.id.buttonUID);
         prescriptionButton = (Button) findViewById(R.id.buttonPrescription);
+        pillsButton = (Button) findViewById(R.id.buttonPills);
 
         hubButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v) {
@@ -46,6 +48,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent goConfirm = new Intent(MainActivity.this, Confirmation.class);
                 startActivity(goConfirm);
+            }
+        });
+
+        pillsButton.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v) {
+                Intent goMyPills = new Intent(MainActivity.this, MyPills.class);
+                goMyPills.putExtra("FROM_MAIN", true);
+                startActivity(goMyPills);
             }
         });
 

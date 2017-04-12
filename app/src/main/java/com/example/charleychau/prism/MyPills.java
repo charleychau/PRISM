@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.RemoteException;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.IntegerRes;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -155,8 +156,8 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                 filtered = true;
 
                 // Handle audio feedback
-                String phrase = "Hello User. Your pills that you need to take include the following: You need to take ";
-                speak(tts, phrase);
+                String phrase = "Hello Tom. It is the afternoon. Your pills that you need to take right now are: ";
+                speak(phrase);
 
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
@@ -165,13 +166,20 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                     public void run() {
                         for (int i = 0; i < filteredArray.size(); i++) {
                             currPill = filteredArray.get(i);
-                            String reminder = currPill.getPillPerUse() + " " + currPill.getName() + " ";
-                            speak(tts, reminder);
-                            try {
-                                synchronized (this) {
-                                    wait(1500);
-                                }
-                            } catch (InterruptedException ex) {}
+
+                            if (Integer.parseInt(currPill.getStart()) == 2) {
+                                String reminder = currPill.getPillPerUse() + " " + currPill.getName() + " ";
+                                speak(reminder);
+                                try {
+                                    synchronized (this) {
+                                        wait(1500);
+                                    }
+                                } catch (InterruptedException ex) {}
+                            }
+                            else {
+                                String reminder = "nothing at this time.";
+                                speak(reminder);
+                            }
                         }
                     }
 
@@ -232,18 +240,34 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
             }
         });
 
-        // Retrieve pill from intent
-        pill = (Pill) getIntent().getSerializableExtra("PILL");
-        // Retrieve pill array from intent
-        pillsArray = (ArrayList<Pill>) getIntent().getSerializableExtra("PILLS_ARRAY");
+        // If from main, just show pill list with current pills. If not, add pill from intent.
+        if (getIntent().getExtras().getBoolean("FROM_MAIN") == false) {
+            // Retrieve pill from intent
+            pill = (Pill) getIntent().getSerializableExtra("PILL");
+            // Retrieve pill array from intent
+            pillsArray = (ArrayList<Pill>) getIntent().getSerializableExtra("PILLS_ARRAY");
+        }
+        else {
+            pillsArray = new ArrayList<>();
+        }
 
         // Default pill2
-        Pill pill2 = new Pill("99", "Hydrocodone", "2F234454F4911BA9FFA6", "000000000003", "Tom", "1", "6", "1", "1", "1", "789456");
+        Pill pill2 = new Pill("99", "Hydrocodone", "2F234454F4911BA9FFA6", "000000000003", "Tom", "1", "6", "1", "1", "3", "789456");
         // Go through pill array and add the default pill if not already in the list
         for (int x = 0; x < pillsArray.size(); x++) {
             if(pillsArray.size() == 0) {
                 pillsArray.add(pill2);
                 pillExists2 = true;
+
+                /*Toast.makeText(MyPills.this, pill2.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                        Toast.LENGTH_SHORT).show();
+                String start = null;
+                if (pill2.getStart().equals("1")) start = "Morning";
+                if (pill2.getStart().equals("2")) start = "Afternoon";
+                if (pill2.getStart().equals("3")) start = "Evening";
+                text("8133896108", pill2.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + pill2.getUname() +
+                        "\nPill ID: " + pill2.getPid() + "\nRefills left: " + pill2.getRefills() + "\nPill Quantity: " +
+                        pill2.getQuantity() + "\nPills Per Use: " + pill2.getPillPerUse() + "\nTake During: " + start);*/
             }
             else if(pillsArray.get(x).getName().equals(pill2.getName())) {
                 pillExists2 = true;
@@ -252,6 +276,16 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         if (pillExists2 == false) {
             pillsArray.add(pill2);
             pillExists2 = true;
+
+            /*Toast.makeText(MyPills.this, pill2.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                    Toast.LENGTH_SHORT).show();
+            String start = null;
+            if (pill2.getStart().equals("1")) start = "Morning";
+            if (pill2.getStart().equals("2")) start = "Afternoon";
+            if (pill2.getStart().equals("3")) start = "Evening";
+            text("8133896108", pill2.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + pill2.getUname() +
+                    "\nPill ID: " + pill2.getPid() + "\nRefills left: " + pill2.getRefills() + "\nPill Quantity: " +
+                    pill2.getQuantity() + "\nPills Per Use: " + pill2.getPillPerUse() + "\nTake During: " + start);*/
         }
 
         // Default pill3
@@ -261,6 +295,16 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
             if(pillsArray.size() == 0) {
                 pillsArray.add(pill3);
                 pillExists3 = true;
+
+                /*Toast.makeText(MyPills.this, pill3.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                        Toast.LENGTH_SHORT).show();
+                String start = null;
+                if (pill3.getStart().equals("1")) start = "Morning";
+                if (pill3.getStart().equals("2")) start = "Afternoon";
+                if (pill3.getStart().equals("3")) start = "Evening";
+                text("8133896108", pill3.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + pill3.getUname() +
+                        "\nPill ID: " + pill3.getPid() + "\nRefills left: " + pill3.getRefills() + "\nPill Quantity: " +
+                        pill3.getQuantity() + "\nPills Per Use: " + pill3.getPillPerUse() + "\nTake During: " + start);*/
             }
             else if(pillsArray.get(x).getName().equals(pill3.getName())) {
                 pillExists3 = true;
@@ -269,23 +313,56 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         if (pillExists3 == false) {
             pillsArray.add(pill3);
             pillExists3 = true;
+
+            /*Toast.makeText(MyPills.this, pill3.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                    Toast.LENGTH_SHORT).show();
+            String start = null;
+            if (pill3.getStart().equals("1")) start = "Morning";
+            if (pill3.getStart().equals("2")) start = "Afternoon";
+            if (pill3.getStart().equals("3")) start = "Evening";
+            text("8133896108", pill3.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + pill3.getUname() +
+                    "\nPill ID: " + pill3.getPid() + "\nRefills left: " + pill3.getRefills() + "\nPill Quantity: " +
+                    pill3.getQuantity() + "\nPills Per Use: " + pill3.getPillPerUse() + "\nTake During: " + start);*/
         }
 
-        // Add pill from intent to list if not already in list
-        for (int x = 0; x < pillsArray.size(); x++) {
-            if(pillsArray.size() == 0) {
+        if (getIntent().getExtras().getBoolean("FROM_MAIN") == false) {
+            // Add pill from intent to list if not already in list
+            for (int x = 0; x < pillsArray.size(); x++) {
+                if(pillsArray.size() == 0) {
+                    pillsArray.add(pill);
+                    pillExists = true;
+
+                    Toast.makeText(MyPills.this, pill.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                            Toast.LENGTH_SHORT).show();
+                    String start = null;
+                    if (pill.getStart().equals("1")) start = "Morning";
+                    if (pill.getStart().equals("2")) start = "Afternoon";
+                    if (pill.getStart().equals("3")) start = "Evening";
+                    text("8133896108", pill.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + pill.getUname() +
+                            "\nPill ID: " + pill.getPid() + "\nRefills left: " + pill.getRefills() + "\nPill Quantity: " +
+                            pill.getQuantity() + "\nPills Per Use: " + pill.getPillPerUse() + "\nTake During: " + start);
+                }
+                else if(pillsArray.get(x).getName().equals(pill.getName())) {
+                    pillExists = true;
+                }
+            }
+            if (pillExists == false) {
                 pillsArray.add(pill);
                 pillExists = true;
-            }
-            else if(pillsArray.get(x).getName().equals(pill.getName())) {
-                pillExists = true;
-            }
-        }
-        if (pillExists == false) {
-            pillsArray.add(pill);
-            pillExists = true;
 
+                Toast.makeText(MyPills.this, pill.getName() + " was added to your hub. You will receive a confirmation text shortly.",
+                        Toast.LENGTH_SHORT).show();
+                String start = null;
+                if (pill.getStart().equals("1")) start = "Morning";
+                if (pill.getStart().equals("2")) start = "Afternoon";
+                if (pill.getStart().equals("3")) start = "Evening";
+                text("8133896108", pill.getName() + " was added to your hub. Here are the details: " + "\nPill Owner: " + pill.getUname() +
+                        "\nPill ID: " + pill.getPid() + "\nRefills left: " + pill.getRefills() + "\nPill Quantity: " +
+                        pill.getQuantity() + "\nPills Per Use: " + pill.getPillPerUse() + "\nTake During: " + start);
+            }
         }
+
+        // Populate listView
         adapter.clear();
         adapter.addAll(pillsArray);
 
@@ -436,9 +513,16 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         // Setting Dialog Title
         alertDialog.setTitle(pill.getName());
 
+        String start = null;
+        if (pill.getStart().equals("1")) start = "Morning";
+        if (pill.getStart().equals("2")) start = "Afternoon";
+        if (pill.getStart().equals("3")) start = "Evening";
+
+
         // Setting Dialog Message
         alertDialog.setMessage("Pill Owner: " + pill.getUname() + "\nPill ID: " + pill.getPid() + "\nRefills left: " +
-                pill.getRefills() + "\nPill Quantity: " + pill.getQuantity() + "\nPills Per Use: " + pill.getPillPerUse());
+                pill.getRefills() + "\nPill Quantity: " + pill.getQuantity() + "\nPills Per Use: " + pill.getPillPerUse() +
+                "\nTake During: " + start);
 
         alertDialog.setNegativeButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {

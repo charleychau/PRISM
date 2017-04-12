@@ -186,14 +186,17 @@ public class Confirmation extends AppCompatActivity implements GoogleApiClient.O
                     Intent addPills = new Intent(Confirmation.this, MyPills.class);
                     addPills.putExtra("PILL", pill);
                     addPills.putExtra("PILLS_ARRAY", pillsArray);
+                    addPills.putExtra("FROM_MAIN", false);
                     startActivityForResult(addPills, PILL_REQUEST);
                 }
                 if (pid.equals("78") && uid.equals("123456")) {
-                    Pill pill = new Pill(pid, "Abilify", "2F234454F4911BA9FFA6", "000000000003", "Tom", "3", "30", "1", "2", "3", uid);
+                    Pill pill = new Pill(pid, "Abilify", "2F234454F4911BA9FFA6", "000000000002", "Michael", "2", "60", "1", "1", "21", uid);
+                    Intent addPills = new Intent(Confirmation.this, MyPills.class);
+                    addPills.putExtra("PILL", pill);
+                    addPills.putExtra("PILLS_ARRAY", pillsArray);
+                    addPills.putExtra("FROM_MAIN", false);
+                    startActivityForResult(addPills, PILL_REQUEST);
                 }
-
-
-
             }
         });
     }

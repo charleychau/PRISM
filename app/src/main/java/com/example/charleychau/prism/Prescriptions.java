@@ -1,11 +1,13 @@
 package com.example.charleychau.prism;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
@@ -44,11 +46,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import android.telephony.SmsManager;
 import android.speech.tts.TextToSpeech;
 
-
+//TODO: make sure endpoint is correct with response
 public class Prescriptions extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
 
     private Button pharmacyButton;
@@ -158,20 +161,9 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
                 //queue.add(srPharm);
                 //queue.add(srNotification);
                 queue.add(srImage);
-            }
-        });
 
-        // Handle Volley
-        queue = Volley.newRequestQueue(this);
-
-        // On response from server, receive text that prescription has been sent and ready
-        responseListener = new Response.Listener<String> () {
-            @Override
-            public void onResponse(String response) {
-                Log.i(TAG, "Response is: " + response);
-
-                //TODO: IMPLEMENT TEXT IN PRESCRIPTIONS
-                //text("8133896108", "Your prescription has been sent.");
+                text("8133896108", "Your prescription has been sent.");
+                speak("Your prescription has been sent.");
                 Context context = getApplicationContext();
                 int duration = Toast.LENGTH_SHORT;
                 Toast toast = Toast.makeText(context, "Refill Request Sent!", duration);
@@ -180,16 +172,26 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
                 Intent returnMain = new Intent(Prescriptions.this, MainActivity.class);
                 returnMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(returnMain);
+            }
+        });
 
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
+        // Handle Volley
+        queue = Volley.newRequestQueue(this);
 
-                    @Override
-                    public void run() {
-                        //text("8133896108", "Your prescription is now ready.");
-                    }
+        // On response from server, receive text that prescription is ready
+        responseListener = new Response.Listener<String> () {
+            @Override
+            public void onResponse(String response) {
+                Log.i(TAG, "Response is: " + response);
+                //Handler handler = new Handler();
+                //handler.postDelayed(new Runnable() {
 
-                }, 10000);
+                //    @Override
+                //    public void run() {
+                        text("8133896108", "Your prescription is now ready.");
+                //    }
+
+                //}, 10000);
             }
         };
 

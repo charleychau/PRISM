@@ -7,15 +7,26 @@
     tools:context="com.example.charleychau.prism.MainActivity">
 
     <Button
+        android:id="@+id/buttonPills"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="36dp"
+        android:text="My Pills"
+        tools:layout_editor_absoluteX="139dp"
+        tools:layout_editor_absoluteY="165dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
         android:id="@+id/buttonUID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Have a UID?"
         tools:layout_editor_absoluteX="139dp"
         tools:layout_editor_absoluteY="165dp"
-        android:layout_above="@+id/buttonPrescription"
+        android:layout_below="@+id/buttonHub"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="105dp" />
+        android:layout_marginTop="86dp" />
 
     <Button
         android:id="@+id/buttonPrescription"
@@ -32,8 +43,8 @@
         android:id="@+id/buttonHub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="57dp"
+        android:text="QR Scanner"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="46dp"
-        android:text="QR Scanner" />
+        android:layout_alignStart="@+id/buttonUID" />
 </RelativeLayout>
