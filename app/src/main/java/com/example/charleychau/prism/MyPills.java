@@ -12,6 +12,7 @@ import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -58,7 +59,9 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
     private boolean pillExists2;
     private boolean filtered = false;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
-    TextToSpeech tts;
+    private static final int PERMISSION_REQUEST_SEND_SMS = 1;
+    private TextToSpeech tts;
+    private SmsManager sms;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +79,8 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                 }
             }
         });
+        sms = SmsManager.getDefault();
+        //requestPermissions(new String[]{Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SEND_SMS);
 
         //user = (User) getIntent().getSerializableExtra("USER");
         pill = (Pill) getIntent().getSerializableExtra("PILL");
@@ -362,5 +367,10 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         } else {
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
         }
+    }
+
+    private void text(String phoneNumber, String smsContent) {
+        sms.sendTextMessage(phoneNumber, null, smsContent, null, null);
+
     }
 }
