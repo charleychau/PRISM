@@ -164,7 +164,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                 filtered = true;
 
                 // Handle audio feedback
-                String phrase = "Hello Tom. It is the afternoon. Your pills that you need to take right now are: ";
+                String phrase = "Hello Travis. It is the afternoon. Your pills that you need to take right now are: ";
                 speak(phrase);
 
                 final Handler handler = new Handler();
@@ -189,9 +189,20 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                                 speak(reminder);
                             }
                         }
+                        handler.postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                speak("You're welcome, Travis!");
+                            }
+
+                        }, 1250);
                     }
 
                 }, 5000);
+
+
+
 
                 // If the user is in range, assume the pills were taken
                 for (int i = 0; i < filteredArray.size(); i++) {
@@ -438,20 +449,28 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                                 intPill4.getQuantity() + "\nPills Per Use: " + intPill4.getPillPerUse() + "\nTake During: " + start);
                     }
                 }
-                else if(pillsArray.get(x).getName().equals(intPill1.getName())) {
-                    intPillExists1 = true;
+                else if(getIntent().getExtras().getBoolean("P1_PRESENT")) {
+                    if (pillsArray.get(x).getName().equals(intPill1.getName())) {
+                        intPillExists1 = true;
+                    }
                 }
-                else if(pillsArray.get(x).getName().equals(intPill2.getName())) {
-                    intPillExists2 = true;
+                else if(getIntent().getExtras().getBoolean("P2_PRESENT")) {
+                    if(pillsArray.get(x).getName().equals(intPill2.getName())) {
+                        intPillExists2 = true;
+                    }
                 }
-                else if(pillsArray.get(x).getName().equals(intPill3.getName())) {
-                    intPillExists3 = true;
+                else if(getIntent().getExtras().getBoolean("P3_PRESENT")) {
+                    if (pillsArray.get(x).getName().equals(intPill3.getName())) {
+                        intPillExists3 = true;
+                    }
                 }
-                else if(pillsArray.get(x).getName().equals(intPill4.getName())) {
-                    intPillExists4 = true;
+                else if(getIntent().getExtras().getBoolean("P4_PRESENT")) {
+                    if(pillsArray.get(x).getName().equals(intPill4.getName())) {
+                        intPillExists4 = true;
+                    }
                 }
             }
-            if (intPillExists1 == false) {
+            if (intPillExists1 == false && getIntent().getExtras().getBoolean("P1_PRESENT") == true) {
                 pillsArray.add(intPill1);
                 intPillExists1 = true;
 
@@ -465,7 +484,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         "\nPill ID: " + intPill1.getPid() + "\nRefills left: " + intPill1.getRefills() + "\nPill Quantity: " +
                         intPill1.getQuantity() + "\nPills Per Use: " + intPill1.getPillPerUse() + "\nTake During: " + start);
             }
-            else if (intPillExists2 == false) {
+            else if (intPillExists2 == false && getIntent().getExtras().getBoolean("P2_PRESENT") == true) {
                 pillsArray.add(intPill2);
                 intPillExists2 = true;
 
@@ -479,7 +498,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         "\nPill ID: " + intPill2.getPid() + "\nRefills left: " + intPill2.getRefills() + "\nPill Quantity: " +
                         intPill2.getQuantity() + "\nPills Per Use: " + intPill2.getPillPerUse() + "\nTake During: " + start);
             }
-            else if (intPillExists3 == false) {
+            else if (intPillExists3 == false && getIntent().getExtras().getBoolean("P3_PRESENT") == true) {
                 pillsArray.add(intPill3);
                 intPillExists3 = true;
 
@@ -493,7 +512,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         "\nPill ID: " + intPill3.getPid() + "\nRefills left: " + intPill3.getRefills() + "\nPill Quantity: " +
                         intPill3.getQuantity() + "\nPills Per Use: " + intPill3.getPillPerUse() + "\nTake During: " + start);
             }
-            else if (intPillExists4 == false) {
+            else if (intPillExists4 == false && getIntent().getExtras().getBoolean("P4_PRESENT") == true) {
                 pillsArray.add(intPill4);
                 intPillExists4 = true;
 
