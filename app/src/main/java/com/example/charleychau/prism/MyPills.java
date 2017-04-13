@@ -586,8 +586,25 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                     @Override
                     public void run() {
                         if (region.getUniqueId() == "John"){
-                            Toast.makeText(MyPills.this, "Reached Beacon Code from didEnterRegion", Toast.LENGTH_SHORT).show();
-                            //TODO: Get reminders for pills and filter array
+                            //TODO Ben this is the code that was her when I pulled from your update
+                            /*Toast.makeText(MyPills.this, "Reached Beacon Code from didEnterRegion", Toast.LENGTH_SHORT).show();
+                            for (int i = 0; i < pillsArray.size(); i++) {
+                                if (pillsArray.get(i).getNamespace().equals("2F234454F4911BA9FFA6")  &&
+                                        pillsArray.get(i).getInstance().equals("000000000003")) {
+                                    filteredArray.add(pillsArray.get(i));
+                                }
+                            }
+                            adapter.clear();
+                            adapter.addAll(filteredArray);
+                            filtered = true;
+                            pillsList.invalidateViews();
+                            adapter.notifyDataSetChanged();*/
+
+
+
+
+                            //TODO Ben this is the code I am trying to run when inside beacon range
+                            // Filters pills for beacon with instance of 3
                             for (int i = 0; i < pillsArray.size(); i++) {
                                 if (pillsArray.get(i).getNamespace().equals("2F234454F4911BA9FFA6")  &&
                                         pillsArray.get(i).getInstance().equals("000000000003")) {
@@ -599,6 +616,96 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                             filtered = true;
                             pillsList.invalidateViews();
                             adapter.notifyDataSetChanged();
+
+                            // Handle audio feedback
+                            String phrase = "Hello Tom. It is the afternoon. Your pills that you need to take right now are: ";
+                            speak(phrase);
+
+                            final Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    for (int i = 0; i < filteredArray.size(); i++) {
+                                        currPill = filteredArray.get(i);
+
+                                        if (Integer.parseInt(currPill.getStart()) == 2) {
+                                            String reminder = currPill.getPillPerUse() + " " + currPill.getName() + " ";
+                                            speak(reminder);
+                                            try {
+                                                synchronized (this) {
+                                                    wait(1500);
+                                                }
+                                            } catch (InterruptedException ex) {}
+                                        }
+                                        else {
+                                            String reminder = "nothing at this time.";
+                                            speak(reminder);
+                                        }
+                                        if (Integer.parseInt(currPill.getStart()) == 1) {
+                                            forgotPill = currPill;
+                                        }
+                                    }
+                                    String phrase = "Also, make sure you do not forget to take " + forgotPill.getName() + ", you were supposed " +
+                                            "to take it in the morning.";
+                                    speak(phrase);
+                                }
+
+                            }, 5000);
+
+                            // If the user is in range, assume the pills were taken
+                            for (int i = 0; i < filteredArray.size(); i++) {
+                                filteredArray.get(i).setQuantity(Integer.toString(Integer.parseInt(filteredArray.get(i).getQuantity()) -
+                                        Integer.parseInt(filteredArray.get(i).getPillPerUse())));
+                            }
+
+                            Log.d("debug", "reached after setQuantity");
+
+                            // Goes through personal pill list and checks if any pills need to be refilled
+                            for (int i = 0; i < filteredArray.size(); i++) {
+                                if (Integer.parseInt(filteredArray.get(i).getQuantity()) <= 5) {
+                                    final String uid = filteredArray.get(i).getUid();
+                                    final String pid = filteredArray.get(i).getPid();
+
+                                    final String requestRefill = server + "/pharm/refill/" + uid + "/" + pid;
+                                    StringRequest srRequestRefill = new StringRequest(Request.Method.POST, requestRefill, responseListener, errorListener);
+                                    queue.add(srRequestRefill);
+                                    refillPill = filteredArray.get(i).getName();
+                                    text("8133896108", "A refill request for " + filteredArray.get(i).getName() + " was sent.");
+                                    Toast.makeText(MyPills.this, "A refill request for " + filteredArray.get(i).getName() + " was sent.",
+                                            Toast.LENGTH_SHORT).show();
+                                    Log.d("debug", "refill request sent");
+
+                                    final int finalI = i;
+                                    handler.postDelayed(new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            final String checkRefill = server + "/pharm/refill_ready/" + uid + "/" + pid;
+                                            StringRequest srCheckRefill = new StringRequest(Request.Method.GET, checkRefill, responseListener, errorListener);
+                                            queue.add(srCheckRefill);
+                                            Log.d("debug", "refill request ready sent");
+                                            handler.postDelayed(new Runnable() {
+
+                                                @Override
+                                                public void run() {
+                                                    text("8133896108", "Your refill request for " + refillPill + " is ready.");
+                                                    Log.d("debug", "refill request ready received");
+                                                    Toast.makeText(MyPills.this, "Your refill request for " + refillPill + " is ready.",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            }, 10000);
+                                        }
+
+                                    }, 10000);
+                                }
+                            }
+
+
+
+
+
+
                         }
                     }
                 });
