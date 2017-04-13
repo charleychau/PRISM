@@ -12,12 +12,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     private Button hubButton;
     private Button uidButton;
     private Button prescriptionButton;
     private Button pillsButton;
+    private ArrayList<Pill> pillsArray = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +59,17 @@ public class MainActivity extends AppCompatActivity {
                 Intent goMyPills = new Intent(MainActivity.this, MyPills.class);
                 goMyPills.putExtra("FROM_MAIN", true);
                 goMyPills.putExtra("FROM_CAMERA", false);
+                goMyPills.putExtra("PILLS_ARRAY", pillsArray);
                 startActivity(goMyPills);
             }
         });
+
+        try {
+            pillsArray = (ArrayList<Pill>) getIntent().getSerializableExtra("PILLS_ARRAY");
+        }
+        catch (Exception e) {
+
+        }
 
 
 

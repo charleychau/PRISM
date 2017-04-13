@@ -172,6 +172,15 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
                 Intent returnMain = new Intent(Prescriptions.this, MainActivity.class);
                 returnMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(returnMain);
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        text("8133896108", "Your prescription is now ready.");
+                    }
+
+                }, 10000);
             }
         });
 
@@ -188,19 +197,19 @@ public class Prescriptions extends AppCompatActivity implements GoogleApiClient.
 
                 //    @Override
                 //    public void run() {
-                        text("8133896108", "Your prescription is now ready.");
+                //        text("8133896108", "Your prescription is now ready.");
                 //    }
 
                 //}, 10000);
             }
         };
 
-        errorListener = new Response.ErrorListener() {
+        /*errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "Error is: " + error.toString());
             }
-        };
+        };*/
     }
 
     @Override

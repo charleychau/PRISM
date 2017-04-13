@@ -43,6 +43,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.RunnableFuture;
 
 import android.os.Handler;
 
@@ -60,10 +61,12 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
     private User user;
     private Pill pill;
     private Pill currPill;
+    private Pill forgotPill;
     private String namespace;
     private String instance;
     private Button addButton;
     private Button remindButton;
+    private Button homeButton;
     private boolean pillExists;
     private boolean pillExists2;
     private boolean pillExists3;
@@ -108,7 +111,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         });
         // SMS
         sms = SmsManager.getDefault();
-        //requestPermissions(new String[]{Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SEND_SMS);
+        requestPermissions(new String[]{Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SEND_SMS);
 
         // Handle Volley
         queue = Volley.newRequestQueue(this);
@@ -116,7 +119,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
             @Override
             public void onResponse(String response) {
                 Log.i(TAG, "Response is: " + response);
-                String str = response;
+                /*String str = response;
                 Boolean ready = null;
                 try {
                     JSONObject obj = new JSONObject(str);
@@ -129,7 +132,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                     }
                 }
                 catch (JSONException e){
-                }
+                }*/
 
             }
         };
@@ -144,12 +147,23 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         pillsList = (ListView) findViewById(R.id.listViewPills);
         addButton = (Button) findViewById(R.id.buttonAdd);
         remindButton = (Button) findViewById(R.id.buttonRemind);
+        homeButton = (Button) findViewById(R.id.buttonHome);
+
         addButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Add Button sends user back to confirmation screen
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("RESULT_ARRAY", pillsArray);
                 setResult(Activity.RESULT_OK, resultIntent);
+                finish();
+            }
+        });
+        homeButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Add Button sends user back to confirmation screen
+                Intent homeIntent = new Intent();
+                homeIntent.putExtra("RESULT_ARRAY", pillsArray);
+                startActivity(homeIntent);
                 finish();
             }
         });
@@ -167,7 +181,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                 filtered = true;
 
                 // Handle audio feedback
-                String phrase = "Hello Travis. It is the afternoon. Your pills that you need to take right now are: ";
+                String phrase = "Hello Tom. It is the afternoon. Your pills that you need to take right now are: ";
                 speak(phrase);
 
                 final Handler handler = new Handler();
@@ -191,21 +205,16 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                                 String reminder = "nothing at this time.";
                                 speak(reminder);
                             }
-                        }
-                        handler.postDelayed(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                speak("You're welcome, Travis!");
+                            if (Integer.parseInt(currPill.getStart()) == 1) {
+                                forgotPill = currPill;
                             }
-
-                        }, 1250);
+                        }
+                        String phrase = "Also, make sure you do not forget to take " + forgotPill.getName() + ", you were supposed " +
+                                "to take it in the morning.";
+                        speak(phrase);
                     }
 
                 }, 5000);
-
-
-
 
                 // If the user is in range, assume the pills were taken
                 for (int i = 0; i < filteredArray.size(); i++) {
@@ -225,8 +234,8 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         StringRequest srRequestRefill = new StringRequest(Request.Method.POST, requestRefill, responseListener, errorListener);
                         queue.add(srRequestRefill);
                         refillPill = filteredArray.get(i).getName();
-                        //text("8133896108", "A refill request for " + filteredArray.get(i).getName() + " was sent.");
-                        Toast.makeText(MyPills.this, "A refil request for " + filteredArray.get(i).getName() + " was sent.",
+                        text("8133896108", "A refill request for " + filteredArray.get(i).getName() + " was sent.");
+                        Toast.makeText(MyPills.this, "A refill request for " + filteredArray.get(i).getName() + " was sent.",
                                 Toast.LENGTH_SHORT).show();
                         Log.d("debug", "refill request sent");
 
@@ -239,6 +248,16 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                                 StringRequest srCheckRefill = new StringRequest(Request.Method.GET, checkRefill, responseListener, errorListener);
                                 queue.add(srCheckRefill);
                                 Log.d("debug", "refill request ready sent");
+                                handler.postDelayed(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        text("8133896108", "Your refill request for " + refillPill + " is ready.");
+                                        Log.d("debug", "refill request ready received");
+                                        Toast.makeText(MyPills.this, "Your refill request for " + refillPill + " is ready.",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                }, 10000);
                             }
 
                         }, 10000);
@@ -393,7 +412,6 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
             }
         }
 
-        //TODO May need to debug
         // If intent is from camera
         if (getIntent().getExtras().getBoolean("FROM_CAMERA") == true) {
             // Add pill from intent to list if not already in list
@@ -452,22 +470,22 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                                 intPill4.getQuantity() + "\nPills Per Use: " + intPill4.getPillPerUse() + "\nTake During: " + start);
                     }
                 }
-                else if(getIntent().getExtras().getBoolean("P1_PRESENT")) {
+                if(getIntent().getExtras().getBoolean("P1_PRESENT")) {
                     if (pillsArray.get(x).getName().equals(intPill1.getName())) {
                         intPillExists1 = true;
                     }
                 }
-                else if(getIntent().getExtras().getBoolean("P2_PRESENT")) {
+                if(getIntent().getExtras().getBoolean("P2_PRESENT")) {
                     if(pillsArray.get(x).getName().equals(intPill2.getName())) {
                         intPillExists2 = true;
                     }
                 }
-                else if(getIntent().getExtras().getBoolean("P3_PRESENT")) {
+                if(getIntent().getExtras().getBoolean("P3_PRESENT")) {
                     if (pillsArray.get(x).getName().equals(intPill3.getName())) {
                         intPillExists3 = true;
                     }
                 }
-                else if(getIntent().getExtras().getBoolean("P4_PRESENT")) {
+                if(getIntent().getExtras().getBoolean("P4_PRESENT")) {
                     if(pillsArray.get(x).getName().equals(intPill4.getName())) {
                         intPillExists4 = true;
                     }
@@ -487,7 +505,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         "\nPill ID: " + intPill1.getPid() + "\nRefills left: " + intPill1.getRefills() + "\nPill Quantity: " +
                         intPill1.getQuantity() + "\nPills Per Use: " + intPill1.getPillPerUse() + "\nTake During: " + start);
             }
-            else if (intPillExists2 == false && getIntent().getExtras().getBoolean("P2_PRESENT") == true) {
+            if (intPillExists2 == false && getIntent().getExtras().getBoolean("P2_PRESENT") == true) {
                 pillsArray.add(intPill2);
                 intPillExists2 = true;
 
@@ -501,7 +519,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         "\nPill ID: " + intPill2.getPid() + "\nRefills left: " + intPill2.getRefills() + "\nPill Quantity: " +
                         intPill2.getQuantity() + "\nPills Per Use: " + intPill2.getPillPerUse() + "\nTake During: " + start);
             }
-            else if (intPillExists3 == false && getIntent().getExtras().getBoolean("P3_PRESENT") == true) {
+            if (intPillExists3 == false && getIntent().getExtras().getBoolean("P3_PRESENT") == true) {
                 pillsArray.add(intPill3);
                 intPillExists3 = true;
 
@@ -515,7 +533,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                         "\nPill ID: " + intPill3.getPid() + "\nRefills left: " + intPill3.getRefills() + "\nPill Quantity: " +
                         intPill3.getQuantity() + "\nPills Per Use: " + intPill3.getPillPerUse() + "\nTake During: " + start);
             }
-            else if (intPillExists4 == false && getIntent().getExtras().getBoolean("P4_PRESENT") == true) {
+            if (intPillExists4 == false && getIntent().getExtras().getBoolean("P4_PRESENT") == true) {
                 pillsArray.add(intPill4);
                 intPillExists4 = true;
 
@@ -546,7 +564,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                 builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
-                        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_COARSE_LOCATION);
                     }
                 });
                 builder.show();

@@ -636,19 +636,19 @@ public class MyCameraActivity extends AppCompatActivity {
                         String times = "13";
 
                         switch (k) {
-                            case 0: pill1 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", uname, refills,
+                            case 0: pill1 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000004", uname, refills,
                                     quantity, pillPerUse, start, times, uid);
                                 pill1present = true;
                                 break;
-                            case 1: pill2 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000001", uname, refills,
+                            case 1: pill2 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", uname, refills,
                                     quantity, pillPerUse, start, times, uid);
                                 pill2present = true;
                                 break;
-                            case 2: pill3 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000001", uname, refills,
+                            case 2: pill3 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", uname, refills,
                                     quantity, pillPerUse, start, times, uid);
                                 pill3present = true;
                                 break;
-                            case 3: pill4 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000002", uname, refills,
+                            case 3: pill4 = new Pill(pid, pillname, "2F234454F4911BA9FFA6", "000000000003", uname, refills,
                                     quantity, pillPerUse, start, times, uid);
                                 pill4present = true;
                                 break;
@@ -705,11 +705,22 @@ public class MyCameraActivity extends AppCompatActivity {
             }
         }*/
 
+        // Use for debugging
+        /*Pill pill1 = new Pill("41", "Adderall", "2F234454F4911BA9FFA6", "000000000003", "Tom", "1", "20", "1", "2", "3", "789456");
+        Pill pill2 = new Pill("12", "Abilify", "2F234454F4911BA9FFA6", "000000000004", "Julian", "1", "24", "2", "1", "12", "123456");
         Log.d("populate", "REACHED BEFORE INTENTS");
+        Intent addPills = new Intent(MyCameraActivity.this, MyPills.class);
+        addPills.putExtra("PILL1", pill1);
+        addPills.putExtra("PILL2", pill2);
+        addPills.putExtra("FROM_CAMERA", true);
+        addPills.putExtra("FROM_MAIN", false);
+        addPills.putExtra("P1_PRESENT", true);
+        addPills.putExtra("P2_PRESENT", true);
+        startActivity(addPills);*/
 
-
+        // Use for camera detection
         if (!qrPresent) {
-
+            Log.d("cam", "!qrpresent reached");
         }
         else {
             Intent addPills = new Intent(MyCameraActivity.this, MyPills.class);
@@ -725,6 +736,7 @@ public class MyCameraActivity extends AppCompatActivity {
             addPills.putExtra("P4_PRESENT", pill4present);
             startActivity(addPills);
         }
+        qrPresent = false;
     }
 
     private Bitmap getBitmap(String path) {
