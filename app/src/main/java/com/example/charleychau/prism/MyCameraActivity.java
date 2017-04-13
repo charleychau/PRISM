@@ -102,6 +102,7 @@ public class MyCameraActivity extends AppCompatActivity {
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread = new HandlerThread("Camera Background");
     private ArrayList<Result> res = new ArrayList<>();
+    private boolean qrPresent = false;
 
     // Storage Permissions
     // private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -530,8 +531,10 @@ public class MyCameraActivity extends AppCompatActivity {
         Log.d(TAG, "onResume");
         startBackgroundThread();
         if (textureView.isAvailable()) {
-            openCamera();
+            Log.d(TAG, "was avail");
+           // openCamera();
         } else {
+            Log.d(TAG, "not avail");
             textureView.setSurfaceTextureListener(textureListener);
         }
     }
@@ -539,7 +542,7 @@ public class MyCameraActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         Log.d(TAG, "onPause");
-        closeCamera();
+        // closeCamera();
         stopBackgroundThread();
         super.onPause();
     }
@@ -614,14 +617,17 @@ public class MyCameraActivity extends AppCompatActivity {
                 try
                 {
                     Result result = reader.decode(bBitmap);
+                    qrPresent = true;
                     Log.d("info from QR in populat",result.toString());  // INFO FROM SERVER IS HERE
                     String info = result.toString();
                     try {
                         obj = new JSONObject(info);
+
+                        String uname = obj.getString("uname");
+
                         String uid = obj.getString("uid");
                         String pid = obj.getString("pid");
                         String pillname = obj.getString("name");
-                        String uname = obj.getString("uname");
                         String refills = obj.getString("refills");
                         String quantity = obj.getString("quantity");
                         String pillPerUse = obj.getString("pill_per_use");
@@ -648,7 +654,7 @@ public class MyCameraActivity extends AppCompatActivity {
                                 break;
                         }
                     } catch (JSONException e) {
-                        Log.e("MYAPP", "unexpected JSON exception", e);
+                        Log.e("JSON", "GOT AN ERROR", e);
                     }
                 }
                 catch (NotFoundException e)
@@ -701,18 +707,24 @@ public class MyCameraActivity extends AppCompatActivity {
 
         Log.d("populate", "REACHED BEFORE INTENTS");
 
-        Intent addPills = new Intent(MyCameraActivity.this, MyPills.class);
-        if (pill1present) addPills.putExtra("PILL1", pill1);
-        if (pill2present) addPills.putExtra("PILL2", pill2);
-        if (pill3present) addPills.putExtra("PILL3", pill3);
-        if (pill4present) addPills.putExtra("PILL4", pill4);
-        addPills.putExtra("FROM_CAMERA", true);
-        addPills.putExtra("FROM_MAIN", false);
-        addPills.putExtra("P1_PRESENT", pill1present);
-        addPills.putExtra("P2_PRESENT", pill2present);
-        addPills.putExtra("P3_PRESENT", pill3present);
-        addPills.putExtra("P4_PRESENT", pill4present);
-        startActivity(addPills);
+
+        if (!qrPresent) {
+
+        }
+        else {
+            Intent addPills = new Intent(MyCameraActivity.this, MyPills.class);
+            if (pill1present) addPills.putExtra("PILL1", pill1);
+            if (pill2present) addPills.putExtra("PILL2", pill2);
+            if (pill3present) addPills.putExtra("PILL3", pill3);
+            if (pill4present) addPills.putExtra("PILL4", pill4);
+            addPills.putExtra("FROM_CAMERA", true);
+            addPills.putExtra("FROM_MAIN", false);
+            addPills.putExtra("P1_PRESENT", pill1present);
+            addPills.putExtra("P2_PRESENT", pill2present);
+            addPills.putExtra("P3_PRESENT", pill3present);
+            addPills.putExtra("P4_PRESENT", pill4present);
+            startActivity(addPills);
+        }
     }
 
     private Bitmap getBitmap(String path) {
