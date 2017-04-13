@@ -86,6 +86,9 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
     private Pill intPill3;
     private Pill intPill4;
 
+    private MonitorNotifier monitorNotifier;
+    private Region r1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -524,7 +527,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                 builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
-                        //requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
                     }
                 });
                 builder.show();
@@ -534,49 +537,14 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
         beaconManager = BeaconManager.getInstanceForApplication(this);
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
         beaconManager.bind(this);
-    }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_COARSE_LOCATION: {
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "coarse location permission granted");
-                } else {
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle("Functionality limited");
-                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
-                    builder.setPositiveButton(android.R.string.ok, null);
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
 
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                        }
-
-                    });
-                    builder.show();
-                }
-                return;
-            }
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        beaconManager.unbind(this);
-        super.onDestroy();
-    }
-
-    @Override
-    public void onBeaconServiceConnect() {
-        // Regions can also be defined in terms of their bluetooth MAC address.
-        Region region = new Region("John", Identifier.parse("2F234454F4911BA9FFA6"), Identifier.parse("000000000003"), null);
-        beaconManager.addMonitorNotifier(new MonitorNotifier() {
+        monitorNotifier = new MonitorNotifier() {
             @Override
             public void didEnterRegion(final Region region) {
                 if (region.getId1() == null || region.getId2() == null) return;
                 Log.i(TAG, "Beacon found: " + region.toString());
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -600,9 +568,10 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
             }
 
             @Override
-            public void didExitRegion(Region region) {
+            public void didExitRegion(final Region region) {
                 if (region.getId1() == null || region.getId2() == null) return;
                 Log.i(TAG, "Beacon lost: " + region.toString());
+
             }
 
             @Override
@@ -614,17 +583,35 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            //Log.d(TAG, "beacon outside region");
                             /*StringRequest sr = new StringRequest(Request.Method.DELETE, endpoint, responseListener, errorListener);
                             queue.add(sr);*/
+                            //Toast.makeText(MyPills.this, "Reached")
                         }
+
+
                     });
                 }
                 else if (state == MonitorNotifier.INSIDE){
                     Log.i(TAG, "I have entered the beacon region: " + region.toString());
-                    runOnUiThread(new Runnable() {
+                    Log.i(TAG, "Region unique id: " + region.getUniqueId());
+                    MyPills.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            Log.d(TAG, "Running on UI thread...");
+                            updateListView(region);
+                        }
+                    });
+
+
+                    //runOnUiThread(new Runnable() {
+                    //  @Override
+                    //public void run() {
+                    //  updateListView(region);
+                            /*
                             if (region.getUniqueId() == "John"){
+
+                                Log.d(TAG, "beacon inside region");
                                 Toast.makeText(MyPills.this, "Reached Beacon Code from didDetermineStateForRegion", Toast.LENGTH_SHORT).show();
                                 for (int i = 0; i < pillsArray.size(); i++) {
                                     if (pillsArray.get(i).getNamespace().equals("2F234454F4911BA9FFA6")  &&
@@ -637,17 +624,86 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                                 filtered = true;
                                 pillsList.invalidateViews();
                                 adapter.notifyDataSetChanged();
+
                             }
-                        }
-                    });
+                            */
+                    //   }
+                    // });
                 }
             }
-        });
+        };
+        beaconManager.addMonitorNotifier(monitorNotifier);
+        r1 = new Region("John", Identifier.parse("2F234454F4911BA9FFA6"), Identifier.parse("000000000003"), null);
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_COARSE_LOCATION: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "coarse location permission granted");
+                    //beaconManager.bind(this);
+
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Functionality limited");
+                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                        }
+
+                    });
+                    builder.show();
+                }
+                return;
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
         try {
-            beaconManager.startMonitoringBeaconsInRegion(region);
+            beaconManager.removeAllMonitorNotifiers();
+            beaconManager.unbind(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        super.onDestroy();
+    }
+
+
+
+    @Override
+    public void onBeaconServiceConnect() {
+        // Regions can also be defined in terms of their bluetooth MAC address.
+        try {
+            beaconManager.startMonitoringBeaconsInRegion(r1);
         } catch (RemoteException e) {
             e.printStackTrace();
+        }
+    }
+
+
+    public void updateListView(Region region) {
+        if (region.getUniqueId() == "John"){
+            //Log.d(TAG, "GOT IT!");
+            Toast.makeText(MyPills.this, "Reached Beacon Code from didDetermineStateForRegion", Toast.LENGTH_SHORT).show();
+            for (int i = 0; i < pillsArray.size(); i++) {
+                if (pillsArray.get(i).getNamespace().equals("2F234454F4911BA9FFA6")  &&
+                        pillsArray.get(i).getInstance().equals("000000000003")) {
+                    filteredArray.add(pillsArray.get(i));
+                }
+            }
+            adapter.clear();
+            adapter.addAll(filteredArray);
+            filtered = true;
+            pillsList.invalidateViews();
+            adapter.notifyDataSetChanged();
         }
     }
 
