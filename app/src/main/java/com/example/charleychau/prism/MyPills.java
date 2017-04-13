@@ -602,13 +602,8 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            //Log.d(TAG, "beacon outside region");
-                            /*StringRequest sr = new StringRequest(Request.Method.DELETE, endpoint, responseListener, errorListener);
-                            queue.add(sr);*/
-                            //Toast.makeText(MyPills.this, "Reached")
+
                         }
-
-
                     });
                 }
                 else if (state == MonitorNotifier.INSIDE){
@@ -621,33 +616,6 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
                             updateListView(region);
                         }
                     });
-
-
-                    //runOnUiThread(new Runnable() {
-                    //  @Override
-                    //public void run() {
-                    //  updateListView(region);
-                            /*
-                            if (region.getUniqueId() == "John"){
-
-                                Log.d(TAG, "beacon inside region");
-                                Toast.makeText(MyPills.this, "Reached Beacon Code from didDetermineStateForRegion", Toast.LENGTH_SHORT).show();
-                                for (int i = 0; i < pillsArray.size(); i++) {
-                                    if (pillsArray.get(i).getNamespace().equals("2F234454F4911BA9FFA6")  &&
-                                            pillsArray.get(i).getInstance().equals("000000000003")) {
-                                        filteredArray.add(pillsArray.get(i));
-                                    }
-                                }
-                                adapter.clear();
-                                adapter.addAll(filteredArray);
-                                filtered = true;
-                                pillsList.invalidateViews();
-                                adapter.notifyDataSetChanged();
-
-                            }
-                            */
-                    //   }
-                    // });
                 }
             }
         };
@@ -709,8 +677,8 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
 
 
     public void updateListView(Region region) {
-        if (region.getUniqueId() == "John"){
-            //Log.d(TAG, "GOT IT!");
+       // if (region.getUniqueId() == "John"){
+            Log.d(TAG, "GOT IT!");
             Toast.makeText(MyPills.this, "Reached Beacon Code from didDetermineStateForRegion", Toast.LENGTH_SHORT).show();
             for (int i = 0; i < pillsArray.size(); i++) {
                 if (pillsArray.get(i).getNamespace().equals("2F234454F4911BA9FFA6")  &&
@@ -723,7 +691,7 @@ public class MyPills extends AppCompatActivity implements BeaconConsumer{
             filtered = true;
             pillsList.invalidateViews();
             adapter.notifyDataSetChanged();
-        }
+        //}
     }
 
     // Shows info about a pill in a dialog pop-up window
